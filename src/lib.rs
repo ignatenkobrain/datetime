@@ -21,7 +21,7 @@ mod cal;
 pub use cal::{DatePiece, TimePiece};
 pub use cal::units::{Month, Weekday, Year};
 pub use cal::compounds::{YearMonth};
-pub use cal::datetime::{LocalDate, LocalTime, LocalDateTime};
+pub use cal::local;
 pub use cal::fmt::custom as fmt;
 pub use cal::fmt::ISO;  // TODO: replace this with just a 'fmt' import
 pub use cal::offset::{Offset, OffsetDateTime};

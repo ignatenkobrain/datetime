@@ -2,21 +2,21 @@
 //!
 //! # Example
 //! ```
-//! # use datetime::LocalDate;
+//! # use datetime::local::Date;
 //! # use datetime::DatePiece;
 //! use datetime::convenience::Today;
-//! let today:LocalDate = LocalDate::today();
+//! let today:Date = Date::today();
 //! ```
-use cal::datetime::{LocalDate,LocalDateTime};
+use cal::local::{Date, DateTime};
 
 /// Adds `LocalDate::today() -> LocalDate`
 pub trait Today{
-    fn today() -> LocalDate;
+    fn today() -> Date;
 }
 
-impl Today for LocalDate{
-    fn today() -> LocalDate{
-        LocalDateTime::now().date()
+impl Today for Date {
+    fn today() -> Date {
+        DateTime::now().date()
     }
 
 }

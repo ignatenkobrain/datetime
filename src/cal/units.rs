@@ -1,8 +1,7 @@
 use std::ops::Deref;
 
 pub use cal::compounds::{YearMonth};
-pub use cal::datetime::{split_cycles};
-pub use cal::iter::{YearMonths, MonthSpan};
+pub use cal::local::{split_cycles};
 
 use self::Month::*;
 use self::Weekday::*;
@@ -28,41 +27,6 @@ impl Year {
     /// ```
     pub fn is_leap_year(&self) -> bool {
         self.leap_year_calculations().1
-    }
-
-    /// Returns an iterator over a continuous span of months in this year,
-    /// returning year-month pairs.
-    ///
-    /// This method takes one argument that can be of four different types,
-    /// depending on the months you wish to iterate over:
-    ///
-    /// - The `RangeFull` type (such as `..`), which iterates over every
-    ///   month;
-    /// - The `RangeFrom` type (such as `April ..`), which iterates over
-    ///   the months starting from the month given;
-    /// - The `RangeTo` type (such as `.. June`), which iterates over the
-    ///   months stopping at *but not including* the month given;
-    /// - The `Range` type (such as `April .. June`), which iterates over
-    ///   the months starting from the left one and stopping at *but not
-    ///   including* the right one.
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use datetime::Year;
-    /// use datetime::Month::{April, June};
-    ///
-    /// let year = Year(1999);
-    /// assert_eq!(year.months(..).count(), 12);
-    /// assert_eq!(year.months(April ..).count(), 9);
-    /// assert_eq!(year.months(April .. June).count(), 2);
-    /// assert_eq!(year.months(.. June).count(), 5);
-    /// ```
-    pub fn months<S: MonthSpan>(&self, span: S) -> YearMonths {
-        YearMonths {
-            year: *self,
-            iter: span.get_slice().iter(),
-        }
     }
 
     /// Returns a year-month, pairing this year with the given month.
@@ -91,7 +55,7 @@ impl Year {
     pub fn leap_year_calculations(&self) -> (i64, bool) {
         let year = self.0 - 2000;
 
-        // This calculation is the reverse of LocalDate::from_days_since_epoch.
+        // This calculation is the reverse of local::Date::from_days_since_epoch.
         let (num_400y_cycles, mut remainder) = split_cycles(year, 400);
 
         // Standard leap-year calculations, performed on the remainder
@@ -206,14 +170,12 @@ impl Month {
 }
 
 
-
-
 /// A named day of the week.
 ///
 /// Sunday is Day 0. This seems to be a North American thing? It’s pretty
 /// much an arbitrary choice, and as you can’t use the from_zero method,
 /// it won’t affect you at all. If you want to change it, the only thing
-/// that should be affected is LocalDate::days_to_weekday.
+/// that should be affected is local::Date::days_to_weekday.
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum Weekday {
     Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday,
@@ -222,7 +184,7 @@ pub enum Weekday {
 // I’m not going to give weekdays an Ord instance because there’s no
 // real standard as to whether Sunday should come before Monday, or the
 // other way around. Luckily, they don’t need one, as the field is
-// ignored when comparing LocalDates.
+// ignored when comparing local::Dates.
 
 impl Weekday {
     pub fn days_from_monday_as_one(&self) -> i8 {

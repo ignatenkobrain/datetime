@@ -3,10 +3,53 @@ use std::ops::{Range, RangeFrom, RangeTo, RangeFull};
 use std::slice::Iter as SliceIter;
 
 use cal::compounds::YearMonth;
-use cal::datetime::{LocalDate};
+use cal::local;
 use cal::units::{Month, Year};
 use cal::units::Month::*;
 
+
+pub trait MonthsIter {
+
+    /// Returns an iterator over a continuous span of months in this year,
+    /// returning year-month pairs.
+    ///
+    /// This method takes one argument that can be of four different types,
+    /// depending on the months you wish to iterate over:
+    ///
+    /// - The `RangeFull` type (such as `..`), which iterates over every
+    ///   month;
+    /// - The `RangeFrom` type (such as `April ..`), which iterates over
+    ///   the months starting from the month given;
+    /// - The `RangeTo` type (such as `.. June`), which iterates over the
+    ///   months stopping at *but not including* the month given;
+    /// - The `Range` type (such as `April .. June`), which iterates over
+    ///   the months starting from the left one and stopping at *but not
+    ///   including* the right one.
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use datetime::Year;
+    /// use datetime::Month::{April, June};
+    /// use datetime::iter::MonthsIter;
+    ///
+    /// let year = Year(1999);
+    /// assert_eq!(year.months(..).count(), 12);
+    /// assert_eq!(year.months(April ..).count(), 9);
+    /// assert_eq!(year.months(April .. June).count(), 2);
+    /// assert_eq!(year.months(.. June).count(), 5);
+    /// ```
+    fn months<S: MonthSpan>(&self, span: S) -> YearMonths;
+}
+
+impl MonthsIter for Year {
+    fn months<S: MonthSpan>(&self, span: S) -> YearMonths {
+        YearMonths {
+            year: *self,
+            iter: span.get_slice().iter(),
+        }
+    }
+}
 
 /// A span of months, which gets used to construct a `YearMonths` iterator.
 ///
@@ -87,7 +130,7 @@ impl fmt::Debug for YearMonths {
 pub trait DaysIter {
 
     /// Returns an iterator over a continuous span of days in this month,
-    /// returning `LocalDate` values.
+    /// returning `local::Date` values.
     ///
     /// ### Examples
     ///
@@ -156,15 +199,15 @@ pub struct MonthDays {
 }
 
 impl Iterator for MonthDays {
-    type Item = LocalDate;
+    type Item = local::Date;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.range.next().and_then(|d| LocalDate::ymd(self.ym.year.0, self.ym.month, d).ok())
+        self.range.next().and_then(|d| local::Date::ymd(self.ym.year.0, self.ym.month, d).ok())
     }
 }
 
 impl DoubleEndedIterator for MonthDays {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.range.next_back().and_then(|d| LocalDate::ymd(self.ym.year.0, self.ym.month, d).ok())
+        self.range.next_back().and_then(|d| local::Date::ymd(self.ym.year.0, self.ym.month, d).ok())
     }
 }

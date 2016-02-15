@@ -4,7 +4,7 @@ use std::error::Error as ErrorTrait;
 use std::fmt;
 
 use cal::{DatePiece, TimePiece};
-use cal::datetime::{LocalDateTime, Error as DateTimeError};
+use cal::local;
 use cal::fmt::ISO;
 use cal::units::{Month, Weekday};
 use duration::Duration;
@@ -17,7 +17,7 @@ pub struct Offset {
 }
 
 impl Offset {
-    fn adjust(&self, local: LocalDateTime) -> LocalDateTime {
+    fn adjust(&self, local: local::DateTime) -> local::DateTime {
         match self.offset_seconds {
             Some(s) => local + Duration::of(s as i64),
             None    => local,
@@ -55,7 +55,7 @@ impl Offset {
         }
     }
 
-    pub fn transform_date(&self, local: LocalDateTime) -> OffsetDateTime {
+    pub fn transform_date(&self, local: local::DateTime) -> OffsetDateTime {
         OffsetDateTime {
             local: local,
             offset: self.clone(),
@@ -102,7 +102,7 @@ impl fmt::Debug for Offset {
 pub enum Error {
     OutOfRange,
     SignMismatch,
-    Date(DateTimeError),
+    Date(local::Error),
 }
 
 impl fmt::Display for Error {
@@ -133,7 +133,7 @@ impl ErrorTrait for Error {
 
 #[derive(PartialEq, Copy, Clone)]
 pub struct OffsetDateTime {
-    pub local: LocalDateTime,
+    pub local: local::DateTime,
     pub offset: Offset,
 }
 
@@ -238,13 +238,14 @@ mod test {
 
     #[test]
     fn debug_offset_date_time() {
-        use cal::{LocalDate, LocalTime, LocalDateTime, Month};
+        use cal::local;
+        use cal::units::Month;
 
         let offset = Offset::of_seconds(25 * 60 + 21).unwrap();
 
-        let then = LocalDateTime::new(
-                    LocalDate::ymd(2009, Month::February, 13).unwrap(),
-                    LocalTime::hms(23, 31, 30).unwrap());
+        let then = local::DateTime::new(
+                    local::Date::ymd(2009, Month::February, 13).unwrap(),
+                    local::Time::hms(23, 31, 30).unwrap());
 
         let debugged = format!("{:?}", offset.transform_date(then));
         assert_eq!(debugged, "OffsetDateTime(2009-02-13T23:31:30.000+00:25:21)");

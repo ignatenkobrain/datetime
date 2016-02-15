@@ -81,7 +81,7 @@ const TIME_TRIANGLE: &'static [i64; 11] =
 /// A **local date** is a day-long span on the timeline, *without a time
 /// zone*.
 #[derive(Eq, Clone, Copy)]
-pub struct LocalDate {
+pub struct Date {
     ymd:     YMD,
     yearday: i16,
     weekday: Weekday,
@@ -90,7 +90,7 @@ pub struct LocalDate {
 /// A **local time** is a time on the timeline that recurs once a day,
 /// *without a time zone*.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub struct LocalTime {
+pub struct Time {
     hour:   i8,
     minute: i8,
     second: i8,
@@ -100,13 +100,13 @@ pub struct LocalTime {
 /// A **local date-time** is an exact instant on the timeline, *without a
 /// time zone*.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
-pub struct LocalDateTime {
-    date: LocalDate,
-    time: LocalTime,
+pub struct DateTime {
+    date: Date,
+    time: Time,
 }
 
 
-impl LocalDate {
+impl Date {
 
     /// Creates a new local date instance from the given year, month, and day
     /// fields.
@@ -120,19 +120,21 @@ impl LocalDate {
     /// week-of-year, and weekday.
     ///
     /// ```rust
-    /// use datetime::{LocalDate, Month, DatePiece};
+    /// use datetime::local::Date;
+    /// use datetime::Month;
+    /// use datetime::DatePiece;
     ///
-    /// let date = LocalDate::ymd(1969, Month::July, 20).unwrap();
+    /// let date = Date::ymd(1969, Month::July, 20).unwrap();
     /// assert_eq!(date.year(), 1969);
     /// assert_eq!(date.month(), Month::July);
     /// assert_eq!(date.day(), 20);
     ///
-    /// assert!(LocalDate::ymd(2100, Month::February, 29).is_err());
+    /// assert!(Date::ymd(2100, Month::February, 29).is_err());
     /// ```
-    pub fn ymd(year: i64, month: Month, day: i8) -> Result<LocalDate, Error> {
+    pub fn ymd(year: i64, month: Month, day: i8) -> Result<Date, Error> {
         YMD { year: year, month: month, day: day }
             .to_days_since_epoch()
-            .map(|days| LocalDate::from_days_since_epoch(days - EPOCH_DIFFERENCE))
+            .map(|days| Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
     }
 
     /// Creates a new local date instance from the given year and day-of-year
@@ -147,18 +149,19 @@ impl LocalDate {
     /// and day-of-year.
     ///
     /// ```rust
-    /// use datetime::{LocalDate, Weekday, Month, DatePiece};
+    /// use datetime::local::Date;
+    /// use datetime::{Weekday, Month, DatePiece};
     ///
-    /// let date = LocalDate::yd(2015, 0x100).unwrap();
+    /// let date = Date::yd(2015, 0x100).unwrap();
     /// assert_eq!(date.year(), 2015);
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 13);
     /// ```
-    pub fn yd(year: i64, yearday: i64) -> Result<LocalDate, Error> {
+    pub fn yd(year: i64, yearday: i64) -> Result<Date, Error> {
         if yearday.is_within(0..367) {
             let jan_1 = YMD { year: year, month: January, day: 1 };
             let days = try!(jan_1.to_days_since_epoch());
-            Ok(LocalDate::from_days_since_epoch(days + yearday - 1 - EPOCH_DIFFERENCE))
+            Ok(Date::from_days_since_epoch(days + yearday - 1 - EPOCH_DIFFERENCE))
         }
         else {
             Err(Error::OutOfRange)
@@ -177,9 +180,10 @@ impl LocalDate {
     /// week-of-year, and weekday.
     ///
     /// ```rust
-    /// use datetime::{LocalDate, Weekday, Month, DatePiece};
+    /// use datetime::local::Date;
+    /// use datetime::{Weekday, Month, DatePiece};
     ///
-    /// let date = LocalDate::ywd(2015, 37, Weekday::Friday).unwrap();
+    /// let date = Date::ywd(2015, 37, Weekday::Friday).unwrap();
     /// assert_eq!(date.year(), 2015);
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 11);
@@ -190,21 +194,22 @@ impl LocalDate {
     /// when working with dates early in week 1, or late in week 53:
     ///
     /// ```rust
-    /// use datetime::{LocalDate, Weekday, Month, DatePiece};
+    /// use datetime::local::Date;
+    /// use datetime::{Weekday, Month, DatePiece};
     ///
-    /// let date = LocalDate::ywd(2009, 1, Weekday::Monday).unwrap();
+    /// let date = Date::ywd(2009, 1, Weekday::Monday).unwrap();
     /// assert_eq!(date.year(), 2008);
     /// assert_eq!(date.month(), Month::December);
     /// assert_eq!(date.day(), 29);
     /// assert_eq!(date.weekday(), Weekday::Monday);
     ///
-    /// let date = LocalDate::ywd(2009, 53, Weekday::Sunday).unwrap();
+    /// let date = Date::ywd(2009, 53, Weekday::Sunday).unwrap();
     /// assert_eq!(date.year(), 2010);
     /// assert_eq!(date.month(), Month::January);
     /// assert_eq!(date.day(), 3);
     /// assert_eq!(date.weekday(), Weekday::Sunday);
     /// ```
-    pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<LocalDate, Error> {
+    pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<Date, Error> {
         let jan_4 = YMD { year: year, month: January, day: 4 };
         let correction = days_to_weekday(jan_4.to_days_since_epoch().unwrap() - EPOCH_DIFFERENCE).days_from_monday_as_one() as i64 + 3;
 
@@ -212,21 +217,21 @@ impl LocalDate {
 
         if yearday <= 0 {
             let days_in_year = if Year(year - 1).is_leap_year() { 366 } else { 365 };
-            LocalDate::yd(year - 1, days_in_year + yearday)
+            Date::yd(year - 1, days_in_year + yearday)
         }
         else {
             let days_in_year = if Year(year).is_leap_year() { 366 } else { 365 };
 
             if yearday >= days_in_year {
-                LocalDate::yd(year + 1, yearday - days_in_year)
+                Date::yd(year + 1, yearday - days_in_year)
             }
             else {
-                LocalDate::yd(year, yearday)
+                Date::yd(year, yearday)
             }
         }
     }
 
-    /// Computes a LocalDate - year, month, day, weekday, and yearday -
+    /// Computes a Date - year, month, day, weekday, and yearday -
     /// given the number of days that have passed since the EPOCH.
     ///
     /// This is used by all the other constructor functions.
@@ -235,9 +240,10 @@ impl LocalDate {
     /// Instantiate the 25th of September 2015 given its day-of-year (268).
     ///
     /// ```rust
-    /// use datetime::{LocalDate, Month, DatePiece};
+    /// use datetime::local::Date;
+    /// use datetime::{Month, DatePiece};
     ///
-    /// let date = LocalDate::yd(2015, 268).unwrap();
+    /// let date = Date::yd(2015, 268).unwrap();
     /// assert_eq!(date.year(), 2015);
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 25);
@@ -246,14 +252,15 @@ impl LocalDate {
     /// Remember that on leap years, the number of days in a year changes:
     ///
     /// ```rust
-    /// use datetime::{LocalDate, Month, DatePiece};
+    /// use datetime::local::Date;
+    /// use datetime::{Month, DatePiece};
     ///
-    /// let date = LocalDate::yd(2016, 268).unwrap();
+    /// let date = Date::yd(2016, 268).unwrap();
     /// assert_eq!(date.year(), 2016);
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 24);  // not the 25th!
     /// ```
-    fn from_days_since_epoch(days: i64) -> LocalDate {
+    fn from_days_since_epoch(days: i64) -> Date {
 
         // The Gregorian calendar works in 400-year cycles, which repeat
         // themselves ever after.
@@ -329,7 +336,7 @@ impl LocalDate {
         // Finally, adjust the day numbers for human reasons: the first day
         // of the month is the 1st, rather than the 0th, and the year needs
         // to be adjusted relative to the EPOCH.
-        LocalDate {
+        Date {
             yearday: (day_of_year + 1) as i16,
             weekday: days_to_weekday(days),
             ymd: YMD {
@@ -351,8 +358,8 @@ impl LocalDate {
     ///
     /// For this reason, the function is marked as `unsafe`, even though it
     /// (technically) uses unsafe components.
-    pub unsafe fn _new_with_prefilled_values(year: i64, month: Month, day: i8, weekday: Weekday, yearday: i16) -> LocalDate {
-        LocalDate {
+    pub unsafe fn _new_with_prefilled_values(year: i64, month: Month, day: i8, weekday: Weekday, yearday: i16) -> Date {
+        Date {
             ymd: YMD { year: year, month: month, day: day },
             weekday: weekday,
             yearday: yearday,
@@ -363,7 +370,7 @@ impl LocalDate {
     // technically *need* to be unsafe, but I’ll stick with it for now.
 }
 
-impl DatePiece for LocalDate {
+impl DatePiece for Date {
     fn year(&self) -> i64 { self.ymd.year }
     fn month(&self) -> Month { self.ymd.month }
     fn day(&self) -> i8 { self.ymd.day }
@@ -371,42 +378,42 @@ impl DatePiece for LocalDate {
     fn weekday(&self) -> Weekday { self.weekday }
 }
 
-impl fmt::Debug for LocalDate {
+impl fmt::Debug for Date {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "LocalDate({})", self.iso())
+        write!(f, "Date({})", self.iso())
     }
 }
 
-impl PartialEq for LocalDate {
-    fn eq(&self, other: &LocalDate) -> bool {
+impl PartialEq for Date {
+    fn eq(&self, other: &Date) -> bool {
         self.ymd == other.ymd
     }
 }
 
-impl PartialOrd for LocalDate {
-    fn partial_cmp(&self, other: &LocalDate) -> Option<Ordering> {
+impl PartialOrd for Date {
+    fn partial_cmp(&self, other: &Date) -> Option<Ordering> {
         self.ymd.partial_cmp(&other.ymd)
     }
 }
 
-impl Ord for LocalDate {
-    fn cmp(&self, other: &LocalDate) -> Ordering {
+impl Ord for Date {
+    fn cmp(&self, other: &Date) -> Ordering {
         self.ymd.cmp(&other.ymd)
     }
 }
 
-impl LocalTime {
+impl Time {
 
     /// Computes the number of hours, minutes, and seconds, based on the
     /// number of seconds that have elapsed since midnight.
-    pub fn from_seconds_since_midnight(seconds: i64) -> LocalTime {
-        LocalTime::from_seconds_and_milliseconds_since_midnight(seconds, 0)
+    pub fn from_seconds_since_midnight(seconds: i64) -> Time {
+        Time::from_seconds_and_milliseconds_since_midnight(seconds, 0)
     }
 
     /// Computes the number of hours, minutes, and seconds, based on the
     /// number of seconds that have elapsed since midnight.
-    pub fn from_seconds_and_milliseconds_since_midnight(seconds: i64, millisecond_of_second: i16) -> LocalTime {
-        LocalTime {
+    pub fn from_seconds_and_milliseconds_since_midnight(seconds: i64, millisecond_of_second: i16) -> Time {
+        Time {
             hour:   (seconds / 60 / 60) as i8,
             minute: (seconds / 60 % 60) as i8,
             second: (seconds % 60) as i8,
@@ -415,8 +422,8 @@ impl LocalTime {
     }
 
     /// Returns the time at midnight, with all fields initialised to 0.
-    pub fn midnight() -> LocalTime {
-        LocalTime { hour: 0, minute: 0, second: 0, millisecond: 0 }
+    pub fn midnight() -> Time {
+        Time { hour: 0, minute: 0, second: 0, millisecond: 0 }
     }
 
     /// Creates a new timestamp instance with the given hour and minute
@@ -424,10 +431,10 @@ impl LocalTime {
     ///
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
-    pub fn hm(hour: i8, minute: i8) -> Result<LocalTime, Error> {
+    pub fn hm(hour: i8, minute: i8) -> Result<Time, Error> {
         if (hour.is_within(0..24) && minute.is_within(0..60))
         || (hour == 24 && minute == 00) {
-            Ok(LocalTime { hour: hour, minute: minute, second: 0, millisecond: 0 })
+            Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 })
         }
         else {
             Err(Error::OutOfRange)
@@ -439,10 +446,10 @@ impl LocalTime {
     ///
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
-    pub fn hms(hour: i8, minute: i8, second: i8) -> Result<LocalTime, Error> {
+    pub fn hms(hour: i8, minute: i8, second: i8) -> Result<Time, Error> {
         if (hour.is_within(0..24) && minute.is_within(0..60) && second.is_within(0..60))
         || (hour == 24 && minute == 00 && second == 00) {
-            Ok(LocalTime { hour: hour, minute: minute, second: second, millisecond: 0 })
+            Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 })
         }
         else {
             Err(Error::OutOfRange)
@@ -454,11 +461,11 @@ impl LocalTime {
     ///
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
-    pub fn hms_ms(hour: i8, minute: i8, second: i8, millisecond: i16) -> Result<LocalTime, Error> {
+    pub fn hms_ms(hour: i8, minute: i8, second: i8, millisecond: i16) -> Result<Time, Error> {
         if hour.is_within(0..24)   && minute.is_within(0..60)
         && second.is_within(0..60) && millisecond.is_within(0..1000)
         {
-            Ok(LocalTime { hour: hour, minute: minute, second: second, millisecond: millisecond })
+            Ok(Time { hour: hour, minute: minute, second: second, millisecond: millisecond })
         }
         else {
             Err(Error::OutOfRange)
@@ -474,72 +481,72 @@ impl LocalTime {
     }
 }
 
-impl TimePiece for LocalTime {
+impl TimePiece for Time {
     fn hour(&self) -> i8 { self.hour }
     fn minute(&self) -> i8 { self.minute }
     fn second(&self) -> i8 { self.second }
     fn millisecond(&self) -> i16 { self.millisecond }
 }
 
-impl fmt::Debug for LocalTime {
+impl fmt::Debug for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "LocalTime({})", self.iso())
+        write!(f, "Time({})", self.iso())
     }
 }
 
 
-impl LocalDateTime {
+impl DateTime {
 
     /// Computes a complete date-time based on the values in the given
     /// Instant parameter.
-    pub fn from_instant(instant: Instant) -> LocalDateTime {
-        LocalDateTime::at_ms(instant.seconds(), instant.milliseconds())
+    pub fn from_instant(instant: Instant) -> DateTime {
+        DateTime::at_ms(instant.seconds(), instant.milliseconds())
     }
 
     /// Computes a complete date-time based on the number of seconds that
     /// have elapsed since **midnight, 1st January, 1970**, setting the
     /// number of milliseconds to 0.
-    pub fn at(seconds_since_1970_epoch: i64) -> LocalDateTime {
-        LocalDateTime::at_ms(seconds_since_1970_epoch, 0)
+    pub fn at(seconds_since_1970_epoch: i64) -> DateTime {
+        DateTime::at_ms(seconds_since_1970_epoch, 0)
     }
 
     /// Computes a complete date-time based on the number of seconds that
     /// have elapsed since **midnight, 1st January, 1970**,
-    pub fn at_ms(seconds_since_1970_epoch: i64, millisecond_of_second: i16) -> LocalDateTime {
+    pub fn at_ms(seconds_since_1970_epoch: i64, millisecond_of_second: i16) -> DateTime {
         let seconds = seconds_since_1970_epoch - EPOCH_DIFFERENCE * SECONDS_IN_DAY;
 
         // Just split the input value into days and seconds, and let
-        // LocalDate and LocalTime do all the hard work.
+        // Date and Time do all the hard work.
         let (days, secs) = split_cycles(seconds, SECONDS_IN_DAY);
 
-        LocalDateTime {
-            date: LocalDate::from_days_since_epoch(days),
-            time: LocalTime::from_seconds_and_milliseconds_since_midnight(secs, millisecond_of_second),
+        DateTime {
+            date: Date::from_days_since_epoch(days),
+            time: Time::from_seconds_and_milliseconds_since_midnight(secs, millisecond_of_second),
         }
     }
 
     /// Creates a new local date time from a local date and a local time.
-    pub fn new(date: LocalDate, time: LocalTime) -> LocalDateTime {
-        LocalDateTime {
+    pub fn new(date: Date, time: Time) -> DateTime {
+        DateTime {
             date: date,
             time: time,
         }
     }
 
     /// Returns the date portion of this date-time stamp.
-    pub fn date(&self) -> LocalDate {
+    pub fn date(&self) -> Date {
         self.date
     }
 
     /// Returns the time portion of this date-time stamp.
-    pub fn time(&self) -> LocalTime {
+    pub fn time(&self) -> Time {
         self.time
     }
 
     /// Creates a new date-time stamp set to the current time.
-    pub fn now() -> LocalDateTime {
+    pub fn now() -> DateTime {
         let (s, ms) = unsafe { sys_time() };
-        LocalDateTime::at_ms(s, ms)
+        DateTime::at_ms(s, ms)
     }
 
     pub fn to_instant(&self) -> Instant {
@@ -547,12 +554,12 @@ impl LocalDateTime {
         Instant::at_ms(seconds, self.time.millisecond)
     }
 
-    pub fn add_seconds(&self, seconds: i64) -> LocalDateTime {
+    pub fn add_seconds(&self, seconds: i64) -> DateTime {
         Self::from_instant(self.to_instant() + Duration::of(seconds))
     }
 }
 
-impl DatePiece for LocalDateTime {
+impl DatePiece for DateTime {
     fn year(&self) -> i64 { self.date.ymd.year }
     fn month(&self) -> Month { self.date.ymd.month }
     fn day(&self) -> i8 { self.date.ymd.day }
@@ -560,42 +567,42 @@ impl DatePiece for LocalDateTime {
     fn weekday(&self) -> Weekday { self.date.weekday }
 }
 
-impl TimePiece for LocalDateTime {
+impl TimePiece for DateTime {
     fn hour(&self) -> i8 { self.time.hour }
     fn minute(&self) -> i8 { self.time.minute }
     fn second(&self) -> i8 { self.time.second }
     fn millisecond(&self) -> i16 { self.time.millisecond }
 }
 
-impl fmt::Debug for LocalDateTime {
+impl fmt::Debug for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "LocalDateTime({})", self.iso())
+        write!(f, "DateTime({})", self.iso())
     }
 }
 
-impl Add<Duration> for LocalDateTime {
-    type Output = LocalDateTime;
+impl Add<Duration> for DateTime {
+    type Output = DateTime;
 
-    fn add(self, duration: Duration) -> LocalDateTime {
-        LocalDateTime::from_instant(self.to_instant() + duration)
+    fn add(self, duration: Duration) -> DateTime {
+        DateTime::from_instant(self.to_instant() + duration)
     }
 }
 
-impl Sub<Duration> for LocalDateTime {
-    type Output = LocalDateTime;
+impl Sub<Duration> for DateTime {
+    type Output = DateTime;
 
-    fn sub(self, duration: Duration) -> LocalDateTime {
-        LocalDateTime::from_instant(self.to_instant() - duration)
+    fn sub(self, duration: Duration) -> DateTime {
+        DateTime::from_instant(self.to_instant() - duration)
     }
 }
 
 
-/// A **YMD** is an implementation detail of LocalDate. It provides
-/// helper methods relating to the construction of LocalDate instances.
+/// A **YMD** is an implementation detail of Date. It provides
+/// helper methods relating to the construction of Date instances.
 ///
-/// The main difference is that while all LocalDates get checked for
+/// The main difference is that while all Dates get checked for
 /// validity before they are used, there is no such check for YMD. The
-/// interface to LocalDate ensures that it should be impossible to
+/// interface to Date ensures that it should be impossible to
 /// create an instance of the 74th of March, for example, but you’re
 /// free to create such an instance of YMD. For this reason, it is not
 /// exposed to implementors of this library.
@@ -714,7 +721,7 @@ impl ErrorTrait for Error {
 /// Misc tests that don’t seem to fit anywhere.
 #[cfg(test)]
 mod test {
-    pub use super::{LocalDateTime, LocalDate, LocalTime};
+    pub use super::{DateTime, Date, Time};
     pub use cal::units::{Month, Weekday, Year};
     pub use cal::DatePiece;
     pub use std::str::FromStr;
@@ -723,21 +730,21 @@ mod test {
     #[test]
     fn some_leap_years() {
         for year in [2004,2008,2012,2016].iter() {
-            assert!(LocalDate::ymd(*year, Month::February, 29).is_ok());
-            assert!(LocalDate::ymd(*year + 1, Month::February, 29).is_err());
+            assert!(Date::ymd(*year, Month::February, 29).is_ok());
+            assert!(Date::ymd(*year + 1, Month::February, 29).is_err());
         }
-        assert!(LocalDate::ymd(1600,Month::February,29).is_ok());
-        assert!(LocalDate::ymd(1601,Month::February,29).is_err());
-        assert!(LocalDate::ymd(1602,Month::February,29).is_err());
+        assert!(Date::ymd(1600,Month::February,29).is_ok());
+        assert!(Date::ymd(1601,Month::February,29).is_err());
+        assert!(Date::ymd(1602,Month::February,29).is_err());
     }
 
     #[test]
     fn new() {
         for year in 1..3000 {
-            assert!(LocalDate::ymd(year, Month::from_one( 1).unwrap(), 32).is_err()); assert!(LocalDate::ymd(year, Month::from_one( 2).unwrap(), 30).is_err()); assert!(LocalDate::ymd(year, Month::from_one( 3).unwrap(), 32).is_err());
-            assert!(LocalDate::ymd(year, Month::from_one( 4).unwrap(), 31).is_err()); assert!(LocalDate::ymd(year, Month::from_one( 5).unwrap(), 32).is_err()); assert!(LocalDate::ymd(year, Month::from_one( 6).unwrap(), 31).is_err());
-            assert!(LocalDate::ymd(year, Month::from_one( 7).unwrap(), 32).is_err()); assert!(LocalDate::ymd(year, Month::from_one( 8).unwrap(), 32).is_err()); assert!(LocalDate::ymd(year, Month::from_one( 9).unwrap(), 31).is_err());
-            assert!(LocalDate::ymd(year, Month::from_one(10).unwrap(), 32).is_err()); assert!(LocalDate::ymd(year, Month::from_one(11).unwrap(), 31).is_err()); assert!(LocalDate::ymd(year, Month::from_one(12).unwrap(), 32).is_err());
+            assert!(Date::ymd(year, Month::from_one( 1).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 2).unwrap(), 30).is_err()); assert!(Date::ymd(year, Month::from_one( 3).unwrap(), 32).is_err());
+            assert!(Date::ymd(year, Month::from_one( 4).unwrap(), 31).is_err()); assert!(Date::ymd(year, Month::from_one( 5).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 6).unwrap(), 31).is_err());
+            assert!(Date::ymd(year, Month::from_one( 7).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 8).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 9).unwrap(), 31).is_err());
+            assert!(Date::ymd(year, Month::from_one(10).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one(11).unwrap(), 31).is_err()); assert!(Date::ymd(year, Month::from_one(12).unwrap(), 32).is_err());
         }
     }
 
@@ -745,18 +752,18 @@ mod test {
     fn to_from_days_since_epoch() {
         let epoch_difference: i64 = 30 * 365 + 7 + 31 + 29;  // see EPOCH_DIFFERENCE
         for date in  vec![
-            LocalDate::ymd(1970, Month::from_one(01).unwrap(), 01).unwrap(),
-            LocalDate::ymd(  01, Month::from_one(01).unwrap(), 01).unwrap(),
-            LocalDate::ymd(1971, Month::from_one(01).unwrap(), 01).unwrap(),
-            LocalDate::ymd(1973, Month::from_one(01).unwrap(), 01).unwrap(),
-            LocalDate::ymd(1977, Month::from_one(01).unwrap(), 01).unwrap(),
-            LocalDate::ymd(1989, Month::from_one(11).unwrap(), 10).unwrap(),
-            LocalDate::ymd(1990, Month::from_one( 7).unwrap(),  8).unwrap(),
-            LocalDate::ymd(2014, Month::from_one( 7).unwrap(), 13).unwrap(),
-            LocalDate::ymd(2001, Month::from_one( 2).unwrap(), 03).unwrap()
+            Date::ymd(1970, Month::from_one(01).unwrap(), 01).unwrap(),
+            Date::ymd(  01, Month::from_one(01).unwrap(), 01).unwrap(),
+            Date::ymd(1971, Month::from_one(01).unwrap(), 01).unwrap(),
+            Date::ymd(1973, Month::from_one(01).unwrap(), 01).unwrap(),
+            Date::ymd(1977, Month::from_one(01).unwrap(), 01).unwrap(),
+            Date::ymd(1989, Month::from_one(11).unwrap(), 10).unwrap(),
+            Date::ymd(1990, Month::from_one( 7).unwrap(),  8).unwrap(),
+            Date::ymd(2014, Month::from_one( 7).unwrap(), 13).unwrap(),
+            Date::ymd(2001, Month::from_one( 2).unwrap(), 03).unwrap()
         ]{
             assert_eq!( date,
-                LocalDate::from_days_since_epoch(
+                Date::from_days_since_epoch(
                     date.ymd.to_days_since_epoch().unwrap() - epoch_difference));
         }
     }
@@ -766,44 +773,44 @@ mod test {
 
         #[test]
         fn recently() {
-            let date = LocalDate::ymd(1600, Month::February, 28).unwrap();
+            let date = Date::ymd(1600, Month::February, 28).unwrap();
             let debugged = format!("{:?}", date);
 
-            assert_eq!(debugged, "LocalDate(1600-02-28)");
+            assert_eq!(debugged, "Date(1600-02-28)");
         }
 
         #[test]
         fn just_then() {
-            let date = LocalDate::ymd(-753, Month::December, 1).unwrap();
+            let date = Date::ymd(-753, Month::December, 1).unwrap();
             let debugged = format!("{:?}", date);
 
-            assert_eq!(debugged, "LocalDate(-0753-12-01)");
+            assert_eq!(debugged, "Date(-0753-12-01)");
         }
 
         #[test]
         fn far_far_future() {
-            let date = LocalDate::ymd(10601, Month::January, 31).unwrap();
+            let date = Date::ymd(10601, Month::January, 31).unwrap();
             let debugged = format!("{:?}", date);
 
-            assert_eq!(debugged, "LocalDate(+10601-01-31)");
+            assert_eq!(debugged, "Date(+10601-01-31)");
         }
 
         #[test]
         fn midday() {
-            let time = LocalTime::hms(12, 0, 0).unwrap();
+            let time = Time::hms(12, 0, 0).unwrap();
             let debugged = format!("{:?}", time);
 
-            assert_eq!(debugged, "LocalTime(12:00:00.000)");
+            assert_eq!(debugged, "Time(12:00:00.000)");
         }
 
         #[test]
         fn ascending() {
-            let then = LocalDateTime::new(
-                        LocalDate::ymd(2009, Month::February, 13).unwrap(),
-                        LocalTime::hms(23, 31, 30).unwrap());
+            let then = DateTime::new(
+                        Date::ymd(2009, Month::February, 13).unwrap(),
+                        Time::hms(23, 31, 30).unwrap());
             let debugged = format!("{:?}", then);
 
-            assert_eq!(debugged, "LocalDateTime(2009-02-13T23:31:30.000)");
+            assert_eq!(debugged, "DateTime(2009-02-13T23:31:30.000)");
         }
     }
 }

@@ -1,7 +1,7 @@
 //! ISO-8601 date and time calculations, which use years, months, days,
 //! hours, minutes, and seconds.
 
-pub mod datetime;
+pub mod local;
 pub mod fmt;
 pub mod offset;
 pub mod parse;
@@ -12,7 +12,6 @@ pub mod units;
 pub mod compounds;
 pub mod iter;
 
-pub use self::datetime::{LocalDate, LocalTime, LocalDateTime};
 pub use self::compounds::{YearMonth};
 pub use self::units::{Year, Weekday, Month};
 pub use self::offset::{Offset, OffsetDateTime};

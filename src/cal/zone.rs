@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::sync::Arc;
 
 use cal::{DatePiece, TimePiece};
-use cal::datetime::{LocalDateTime};
+use cal::local;
 use cal::units::{Month, Weekday};
 use duration::Duration;
 use instant::Instant;
@@ -43,7 +43,7 @@ impl TimeZone {
 
     /// Returns the total offset from UTC, in seconds, that this time zone
     /// has at the given datetime.
-    pub fn offset(&self, datetime: LocalDateTime) -> i64 {
+    pub fn offset(&self, datetime: local::DateTime) -> i64 {
         match self.0 {
             TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.offset(datetime),
             TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().offset(datetime),
@@ -53,7 +53,7 @@ impl TimeZone {
     /// Returns the time zone abbreviation that this time zone has at the
     /// given datetime. As always, abbreviations are notoriously vague, and
     /// should only be used when referring to a known timezone.
-    pub fn name(&self, datetime: LocalDateTime) -> String {
+    pub fn name(&self, datetime: local::DateTime) -> String {
         match self.0 {
             TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.name(datetime),
             TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().name(datetime),
@@ -76,7 +76,7 @@ impl TimeZone {
 
     /// Converts a local datetime in UTC to a zoned datetime that uses this
     /// time zone.
-    pub fn to_zoned(&self, datetime: LocalDateTime) -> LocalDateTime {
+    pub fn to_zoned(&self, datetime: local::DateTime) -> local::DateTime {
         datetime + Duration::of(self.offset(datetime))
     }
 
@@ -96,7 +96,7 @@ impl TimeZone {
     /// or overlaps two separate timespans (an ambiguous time). The result
     /// will *almost* always be precise, but there are edge cases you need
     /// to watch out for.
-    pub fn convert_local(&self, local: LocalDateTime) -> LocalTimes {
+    pub fn convert_local(&self, local: local::DateTime) -> LocalTimes {
         match self.0 {
             TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.convert_local(local, self.0.clone()),
             TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().convert_local(local, self.0.clone()),
@@ -150,12 +150,12 @@ impl<'a> FixedTimespanSet<'a> {
         }
     }
 
-    fn offset(&self, datetime: LocalDateTime) -> i64 {
+    fn offset(&self, datetime: local::DateTime) -> i64 {
         let unix_timestamp = datetime.to_instant().seconds();
         self.find(unix_timestamp).offset
     }
 
-    fn name(&self, datetime: LocalDateTime) -> String {
+    fn name(&self, datetime: local::DateTime) -> String {
         let unix_timestamp = datetime.to_instant().seconds();
         self.find(unix_timestamp).name.to_string()
     }
@@ -164,7 +164,7 @@ impl<'a> FixedTimespanSet<'a> {
         self.rest.is_empty()
     }
 
-    fn convert_local(&self, local: LocalDateTime, source: TimeZoneSource<'a>) -> LocalTimes<'a> {
+    fn convert_local(&self, local: local::DateTime, source: TimeZoneSource<'a>) -> LocalTimes<'a> {
         let unix_timestamp = local.to_instant().seconds();
 
         let zonify = |offset| ZonedDateTime {
@@ -324,7 +324,7 @@ impl<'a> LocalTimes<'a> {
 
 #[derive(Debug)]
 pub struct ZonedDateTime<'a> {
-    adjusted: LocalDateTime,
+    adjusted: local::DateTime,
     current_offset: i64,
     time_zone: TimeZoneSource<'a>,
 }

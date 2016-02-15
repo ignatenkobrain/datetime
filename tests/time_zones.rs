@@ -1,6 +1,7 @@
 extern crate datetime;
 use datetime::zone::{StaticTimeZone, FixedTimespanSet, FixedTimespan, TimeZoneSource, TimeZone};
-use datetime::{LocalDateTime, LocalDate, LocalTime, Month, DatePiece, TimePiece};
+use datetime::local::{DateTime, Date, Time};
+use datetime::{Month, DatePiece, TimePiece};
 use std::borrow::Cow;
 
 
@@ -49,9 +50,9 @@ const TEST_ZONESET: &'static StaticTimeZone<'static> = &StaticTimeZone {
 
 #[test]
 fn construction() {
-    let test_date = LocalDateTime::new(
-        LocalDate::ymd(2010, Month::June, 9).unwrap(),
-        LocalTime::hms(15, 15, 0).unwrap(),
+    let test_date = DateTime::new(
+        Date::ymd(2010, Month::June, 9).unwrap(),
+        Time::hms(15, 15, 0).unwrap(),
     );
 
     let zone = TimeZone(TimeZoneSource::Static(TEST_ZONESET));
@@ -61,9 +62,9 @@ fn construction() {
     assert_eq!(zoned_date.year(), 2010);
     assert_eq!(zoned_date.hour(), 15);
 
-    let instant = LocalDateTime::new(
-        LocalDate::ymd(2010, Month::June, 9).unwrap(),
-        LocalTime::hms(14, 15, 0).unwrap(),
+    let instant = DateTime::new(
+        Date::ymd(2010, Month::June, 9).unwrap(),
+        Time::hms(14, 15, 0).unwrap(),
     ).to_instant();
 
     assert_eq!(instant, zoned_date.to_instant());
@@ -71,9 +72,9 @@ fn construction() {
 
 #[test]
 fn ambiguity() {
-    let test_date = LocalDateTime::new(
-        LocalDate::ymd(2010, Month::October, 31).unwrap(),
-        LocalTime::hms(1, 15, 0).unwrap(),
+    let test_date = DateTime::new(
+        Date::ymd(2010, Month::October, 31).unwrap(),
+        Time::hms(1, 15, 0).unwrap(),
     );
 
     let zone = TimeZone(TimeZoneSource::Static(TEST_ZONESET));
@@ -84,9 +85,9 @@ fn ambiguity() {
 
 #[test]
 fn impossible() {
-    let test_date = LocalDateTime::new(
-        LocalDate::ymd(2010, Month::March, 28).unwrap(),
-        LocalTime::hms(1, 15, 0).unwrap(),
+    let test_date = DateTime::new(
+        Date::ymd(2010, Month::March, 28).unwrap(),
+        Time::hms(1, 15, 0).unwrap(),
     );
 
     let zone = TimeZone(TimeZoneSource::Static(TEST_ZONESET));
