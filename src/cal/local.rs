@@ -15,7 +15,6 @@ use system::sys_time;
 use util::RangeExt;
 
 
-
 /// Number of days guaranteed to be in four years.
 const DAYS_IN_4Y:   i64 = 365 *   4 +  1;
 
@@ -131,7 +130,7 @@ impl Date {
     ///
     /// assert!(Date::ymd(2100, Month::February, 29).is_err());
     /// ```
-    pub fn ymd(year: i64, month: Month, day: i8) -> Result<Date, Error> {
+    pub fn ymd(year: i64, month: Month, day: i8) -> Result<Date> {
         YMD { year: year, month: month, day: day }
             .to_days_since_epoch()
             .map(|days| Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
@@ -157,7 +156,7 @@ impl Date {
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 13);
     /// ```
-    pub fn yd(year: i64, yearday: i64) -> Result<Date, Error> {
+    pub fn yd(year: i64, yearday: i64) -> Result<Date> {
         if yearday.is_within(0..367) {
             let jan_1 = YMD { year: year, month: January, day: 1 };
             let days = try!(jan_1.to_days_since_epoch());
@@ -209,7 +208,7 @@ impl Date {
     /// assert_eq!(date.day(), 3);
     /// assert_eq!(date.weekday(), Weekday::Sunday);
     /// ```
-    pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<Date, Error> {
+    pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<Date> {
         let jan_4 = YMD { year: year, month: January, day: 4 };
         let correction = days_to_weekday(jan_4.to_days_since_epoch().unwrap() - EPOCH_DIFFERENCE).days_from_monday_as_one() as i64 + 3;
 
@@ -431,7 +430,7 @@ impl Time {
     ///
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
-    pub fn hm(hour: i8, minute: i8) -> Result<Time, Error> {
+    pub fn hm(hour: i8, minute: i8) -> Result<Time> {
         if (hour.is_within(0..24) && minute.is_within(0..60))
         || (hour == 24 && minute == 00) {
             Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 })
@@ -446,7 +445,7 @@ impl Time {
     ///
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
-    pub fn hms(hour: i8, minute: i8, second: i8) -> Result<Time, Error> {
+    pub fn hms(hour: i8, minute: i8, second: i8) -> Result<Time> {
         if (hour.is_within(0..24) && minute.is_within(0..60) && second.is_within(0..60))
         || (hour == 24 && minute == 00 && second == 00) {
             Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 })
@@ -461,7 +460,7 @@ impl Time {
     ///
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
-    pub fn hms_ms(hour: i8, minute: i8, second: i8, millisecond: i16) -> Result<Time, Error> {
+    pub fn hms_ms(hour: i8, minute: i8, second: i8, millisecond: i16) -> Result<Time> {
         if hour.is_within(0..24)   && minute.is_within(0..60)
         && second.is_within(0..60) && millisecond.is_within(0..1000)
         {
@@ -622,7 +621,7 @@ impl YMD {
     /// This method returns a Result instead of exposing is_valid to
     /// the user, because the leap year calculations are used in both
     /// functions, so it makes more sense to only do them once.
-    pub fn to_days_since_epoch(&self) -> Result<i64, Error> {
+    pub fn to_days_since_epoch(&self) -> Result<i64> {
         let years = self.year - 2000;
         let (leap_days_elapsed, is_leap_year) = Year(self.year).leap_year_calculations();
 
@@ -716,6 +715,8 @@ impl ErrorTrait for Error {
     }
 }
 
+use std::result;
+pub type Result<T> = result::Result<T, Error>;
 
 
 /// Misc tests that don’t seem to fit anywhere.

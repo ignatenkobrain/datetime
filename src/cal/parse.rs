@@ -63,7 +63,7 @@ impl FromStr for OffsetDateTime {
 }
 
 
-fn fields_to_date(fields: iso8601::Date) -> Result<local::Date, local::Error> {
+fn fields_to_date(fields: iso8601::Date) -> local::Result<local::Date> {
     if let iso8601::Date::YMD { year, month, day } = fields {
         let month_variant = try!(Month::from_one(month as i8).ok_or_else(||local::Error::OutOfRange));
         local::Date::ymd(year as i64, month_variant, day as i8)
@@ -80,7 +80,7 @@ fn fields_to_date(fields: iso8601::Date) -> Result<local::Date, local::Error> {
     }
 }
 
-fn fields_to_time(fields: iso8601::Time) -> Result<local::Time, local::Error> {
+fn fields_to_time(fields: iso8601::Time) -> local::Result<local::Time> {
     let h  = fields.hour as i8;
     let m  = fields.minute as i8;
     let s  = fields.second as i8;

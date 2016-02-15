@@ -31,7 +31,7 @@ impl YearMonth {
     /// Returns a `local::Date` based on the day of this month.
     ///
     /// This is just a short-cut for the `local::Date::ymd` constructor.
-    pub fn day(&self, day: i8) -> Result<local::Date, local::Error> {
+    pub fn day(&self, day: i8) -> local::Result<local::Date> {
         local::Date::ymd(self.year.0, self.month, day)
     }
 }
