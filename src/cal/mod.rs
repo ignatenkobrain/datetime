@@ -8,9 +8,15 @@ pub mod parse;
 pub mod zone;
 pub mod convenience;
 
-pub use self::datetime::{LocalDate, LocalTime, LocalDateTime, Weekday, Month};
-pub use self::datetime::{YearMonth, Year};
+pub mod units;
+pub mod compounds;
+pub mod iter;
+
+pub use self::datetime::{LocalDate, LocalTime, LocalDateTime};
+pub use self::compounds::{YearMonth};
+pub use self::units::{Year, Weekday, Month};
 pub use self::offset::{Offset, OffsetDateTime};
+
 
 /// The **date piece** trait is used for date and time values that have
 /// date components of years, months, and days.

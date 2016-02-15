@@ -3,10 +3,11 @@
 use std::error::Error as ErrorTrait;
 use std::fmt;
 
-use duration::Duration;
 use cal::{DatePiece, TimePiece};
-use cal::datetime::{LocalDateTime, Month, Weekday, Error as DateTimeError};
+use cal::datetime::{LocalDateTime, Error as DateTimeError};
 use cal::fmt::ISO;
+use cal::units::{Month, Weekday};
+use duration::Duration;
 use util::RangeExt;
 
 

@@ -4,8 +4,9 @@ use std::str::FromStr;
 
 use iso8601;
 
-use cal::datetime::{LocalDate, LocalTime, LocalDateTime, Month, Weekday, Error as DateTimeError};
+use cal::datetime::{LocalDate, LocalTime, LocalDateTime, Error as DateTimeError};
 use cal::offset::{Offset, OffsetDateTime, Error as OffsetError};
+use cal::units::{Month, Weekday};
 
 
 impl FromStr for LocalDate {
@@ -64,11 +65,11 @@ impl FromStr for OffsetDateTime {
 
 fn fields_to_date(fields: iso8601::Date) -> Result<LocalDate, DateTimeError> {
     if let iso8601::Date::YMD { year, month, day } = fields {
-        let month_variant = try!(Month::from_one(month as i8));
+        let month_variant = try!(Month::from_one(month as i8).ok_or_else(||DateTimeError::OutOfRange));
         LocalDate::ymd(year as i64, month_variant, day as i8)
     }
     else if let iso8601::Date::Week { year, ww, d } = fields {
-        let weekday_variant = try!(Weekday::from_one(d as i8));
+        let weekday_variant = try!(Weekday::from_one(d as i8).ok_or_else(||DateTimeError::OutOfRange));
         LocalDate::ywd(year as i64, ww as i64, weekday_variant)
     }
     else if let iso8601::Date::Ordinal { year, ddd } = fields {
