@@ -84,6 +84,36 @@ impl fmt::Debug for YearMonths {
 }
 
 
+pub trait DaysIter {
+
+    /// Returns an iterator over a continuous span of days in this month,
+    /// returning `LocalDate` values.
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use datetime::Year;
+    /// use datetime::Month::September;
+    /// use datetime::iter::DaysIter;
+    ///
+    /// let ym = Year(1999).month(September);
+    /// assert_eq!(ym.days(..).count(), 30);
+    /// assert_eq!(ym.days(10 ..).count(), 21);
+    /// assert_eq!(ym.days(10 .. 20).count(), 10);
+    /// assert_eq!(ym.days(.. 20).count(), 19);
+    /// ```
+    fn days<S: DaySpan>(&self, span: S) -> MonthDays;
+}
+
+impl DaysIter for YearMonth {
+    fn days<S: DaySpan>(&self, span: S) -> MonthDays {
+        MonthDays {
+            ym: *self,
+            range: span.get_range(self)
+        }
+    }
+}
+
 /// A span of days, which gets used to construct a `MonthDays` iterator.
 pub trait DaySpan {
 

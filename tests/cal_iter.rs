@@ -1,5 +1,6 @@
 extern crate datetime;
 pub use datetime::{YearMonth, Year};
+pub use datetime::iter::DaysIter;
 
 mod months {
     use super::*;

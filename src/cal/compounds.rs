@@ -1,5 +1,4 @@
 use cal::datetime::{LocalDate, Error};
-use cal::iter::{DaySpan, MonthDays};
 use cal::units::{Year, Month};
 
 
@@ -27,28 +26,6 @@ impl YearMonth {
     /// ```
     pub fn day_count(&self) -> i8 {
         self.month.days_in_month(self.year.is_leap_year())
-    }
-
-    /// Returns an iterator over a continuous span of days in this month,
-    /// returning `LocalDate` values.
-    ///
-    /// ### Examples
-    ///
-    /// ```
-    /// use datetime::Year;
-    /// use datetime::Month::September;
-    ///
-    /// let ym = Year(1999).month(September);
-    /// assert_eq!(ym.days(..).count(), 30);
-    /// assert_eq!(ym.days(10 ..).count(), 21);
-    /// assert_eq!(ym.days(10 .. 20).count(), 10);
-    /// assert_eq!(ym.days(.. 20).count(), 19);
-    /// ```
-    pub fn days<S: DaySpan>(&self, span: S) -> MonthDays {
-        MonthDays {
-            ym: *self,
-            range: span.get_range(self)
-        }
     }
 
     /// Returns a `LocalDate` based on the day of this month.
