@@ -252,14 +252,14 @@ impl Date {
         let yearday = 7 * week + weekday.days_from_monday_as_one() as i64 - correction;
 
         if yearday <= 0 {
-            let days_in_year = if Year(*year - 1).is_leap_year() { 366 } else { 365 };
+            let days_in_year = if year.previous_year().is_leap_year() { 366 } else { 365 };
             Date::yd(*year - 1, days_in_year + yearday)
         }
         else {
             let days_in_year = if year.is_leap_year() { 366 } else { 365 };
 
             if yearday >= days_in_year {
-                Date::yd(Year::from(*year + 1), yearday - days_in_year)
+                Date::yd(year.next_year(), yearday - days_in_year)
             }
             else {
                 Date::yd(year, yearday)

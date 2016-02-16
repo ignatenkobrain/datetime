@@ -15,6 +15,32 @@ pub struct Year(pub i64);
 
 impl Year {
 
+    /// Returns the year after this year.
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use datetime::Year;
+    ///
+    /// assert_eq!(Year::from(1904).next_year(), Year::from(1905));
+    /// ```
+    pub fn next_year(&self) -> Year {
+        Year(self.0 + 1)
+    }
+
+    /// Returns the year before this year.
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use datetime::Year;
+    ///
+    /// assert_eq!(Year::from(1904).previous_year(), Year::from(1903));
+    /// ```
+    pub fn previous_year(&self) -> Year {
+        Year(self.0 - 1)
+    }
+
     /// Returns whether this year is a leap year.
     ///
     /// ### Examples
