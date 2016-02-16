@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 pub use cal::compounds::{YearMonth};
 pub use util::split_cycles;
@@ -87,6 +87,23 @@ impl Deref for Year {
     }
 }
 
+impl DerefMut for Year {
+    fn deref_mut<'a>(&'a mut self) -> &'a mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl AsRef<i64> for Year {
+    fn as_ref(&self) -> &i64 {
+        &self.0
+    }
+}
+
+impl AsMut<i64> for Year {
+    fn as_mut(&mut self) -> &mut i64 {
+        &mut self.0
+    }
+}
 
 
 /// A month of the year, starting with January, and ending with December.
