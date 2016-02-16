@@ -1,5 +1,6 @@
 extern crate datetime;
 pub use datetime::{YearMonth, Year};
+pub use datetime::iter::{DaysIter, MonthsIter};
 
 mod months {
     use super::*;
@@ -81,14 +82,14 @@ mod months {
 
 mod days {
     use super::*;
-    use datetime::LocalDate;
+    use datetime::local::Date;
     use datetime::Month::*;
 
     #[test]
     fn range_full() {
         let year = Year(2013).month(February);
         let days: Vec<_> = year.days(..).collect();
-        let results: Vec<_> = (1..29).map(|d| LocalDate::ymd(2013, February, d).unwrap()).collect();
+        let results: Vec<_> = (1..29).map(|d| Date::ymd(2013, February, d).unwrap()).collect();
         assert_eq!(days, results);
     }
 
@@ -96,7 +97,7 @@ mod days {
     fn range_full_leap_year() {
         let year = Year(2000).month(February);
         let days: Vec<_> = year.days(..).collect();
-        let results: Vec<_> = (1..30).map(|d| LocalDate::ymd(2000, February, d).unwrap()).collect();
+        let results: Vec<_> = (1..30).map(|d| Date::ymd(2000, February, d).unwrap()).collect();
         assert_eq!(days, results);
     }
 
@@ -104,14 +105,14 @@ mod days {
     fn range() {
         let year = Year(2008).month(March);
         let days: Vec<_> = year.days(10..20).collect();
-        let results: Vec<_> = (10..20).map(|d| LocalDate::ymd(2008, March, d).unwrap()).collect();
+        let results: Vec<_> = (10..20).map(|d| Date::ymd(2008, March, d).unwrap()).collect();
         assert_eq!(days, results);
     }
 
     #[test]
     fn just_for_one_day() {
         let day = Year(1066).month(October).day(14);
-        assert_eq!(day, LocalDate::ymd(1066, October, 14));
+        assert_eq!(day, Date::ymd(1066, October, 14));
     }
 }
 

@@ -1,11 +1,11 @@
 extern crate datetime;
-use datetime::{LocalDateTime, Month};
-use datetime::{DatePiece, TimePiece};
+use datetime::{Month, DatePiece, TimePiece};
+use datetime::local::DateTime;
 
 
 #[test]
 fn a_long_time_ago() {
-    let date = LocalDateTime::at(-1_000_000_000);
+    let date = DateTime::at(-1_000_000_000);
 
     assert_eq!(date.year(),   1938);
     assert_eq!(date.month(),  Month::April);
@@ -18,7 +18,7 @@ fn a_long_time_ago() {
 
 #[test]
 fn unix_epoch() {
-    let date = LocalDateTime::at(0);
+    let date = DateTime::at(0);
 
     assert_eq!(date.year(),   1970);
     assert_eq!(date.month(),  Month::January);
@@ -31,7 +31,7 @@ fn unix_epoch() {
 
 #[test]
 fn billennium() {
-    let date = LocalDateTime::at(1_000_000_000);
+    let date = DateTime::at(1_000_000_000);
 
     assert_eq!(date.year(),   2001);
     assert_eq!(date.month(),  Month::September);
@@ -44,7 +44,7 @@ fn billennium() {
 
 #[test]
 fn numbers() {
-    let date = LocalDateTime::at(1_234_567_890);
+    let date = DateTime::at(1_234_567_890);
 
     assert_eq!(date.year(),   2009);
     assert_eq!(date.month(),  Month::February);
@@ -57,7 +57,7 @@ fn numbers() {
 
 #[test]
 fn year_2038_problem() {
-    let date = LocalDateTime::at(0x7FFF_FFFF);
+    let date = DateTime::at(0x7FFF_FFFF);
 
     assert_eq!(date.year(),   2038);
     assert_eq!(date.month(),  Month::January);
@@ -70,7 +70,7 @@ fn year_2038_problem() {
 
 #[test]
 fn the_end_of_time() {
-    let date = LocalDateTime::at(0x7FFF_FFFF_FFFF_FFFF);
+    let date = DateTime::at(0x7FFF_FFFF_FFFF_FFFF);
 
     assert_eq!(date.year(),   292_277_026_596);
     assert_eq!(date.month(),  Month::December);
@@ -83,7 +83,7 @@ fn the_end_of_time() {
 
 #[test]
 fn just_some_date() {
-    let date = LocalDateTime::at(146096 * 86400);
+    let date = DateTime::at(146096 * 86400);
 
     assert_eq!(date.year(),   2369);
     assert_eq!(date.month(),  Month::December);

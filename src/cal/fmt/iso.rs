@@ -1,6 +1,7 @@
 use std::fmt;
-use cal::{LocalDate, LocalTime, LocalDateTime, DatePiece, TimePiece};
-use cal::{Offset, OffsetDateTime};
+use cal::{DatePiece, TimePiece};
+use cal::offset;
+use cal::local;
 use util::RangeExt;
 
 
@@ -21,7 +22,7 @@ where T: ISO {
     }
 }
 
-impl ISO for LocalDate {
+impl ISO for local::Date {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let year = self.year();
         if year.is_within(0 .. 9999) {
@@ -33,13 +34,13 @@ impl ISO for LocalDate {
     }
 }
 
-impl ISO for LocalTime {
+impl ISO for local::Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:02}:{:02}:{:02}.{:03}", self.hour(), self.minute(), self.second(), self.millisecond())
     }
 }
 
-impl ISO for LocalDateTime {
+impl ISO for local::DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         try!(self.date().fmt(f));
         try!(write!(f, "T"));
@@ -47,7 +48,7 @@ impl ISO for LocalDateTime {
     }
 }
 
-impl ISO for Offset {
+impl ISO for offset::Offset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.is_utc() {
             write!(f, "Z")
@@ -64,7 +65,7 @@ impl ISO for Offset {
     }
 }
 
-impl ISO for OffsetDateTime {
+impl ISO for offset::DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}", self.local.iso(), self.offset.iso())
     }
