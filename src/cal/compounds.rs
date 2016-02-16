@@ -35,3 +35,19 @@ impl YearMonth {
         local::Date::ymd(self.year.0, self.month, day)
     }
 }
+
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
+pub struct YearMonthDay {
+    pub year: Year,
+    pub month: Month,
+    pub day: i8,
+}
+
+impl YearMonthDay {
+
+    /// Returns whether this datestamp is valid, which basically means
+    /// whether the day is in the range allowed by the month.
+    pub fn is_valid(&self, is_leap_year: bool) -> bool {
+        self.day >= 1 && self.day <= self.month.days_in_month(is_leap_year)
+    }
+}
