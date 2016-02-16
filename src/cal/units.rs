@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 pub use cal::compounds::{YearMonth};
-pub use cal::local::{split_cycles};
+pub use util::split_cycles;
 
 use self::Month::*;
 use self::Weekday::*;
