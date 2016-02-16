@@ -28,7 +28,7 @@ impl Offset {
         Offset { offset_seconds: None }
     }
 
-    pub fn of_seconds(seconds: i32) -> Result<Offset, Error> {
+    pub fn of_seconds(seconds: i32) -> Result<Offset> {
         if seconds.is_within(-86400..86401) {
             Ok(Offset { offset_seconds: Some(seconds) })
         }
@@ -37,7 +37,7 @@ impl Offset {
         }
     }
 
-    pub fn of_hours_and_minutes(hours: i8, minutes: i8) -> Result<Offset, Error> {
+    pub fn of_hours_and_minutes(hours: i8, minutes: i8) -> Result<Offset> {
         if (hours.is_positive() && minutes.is_negative())
         || (hours.is_negative() && minutes.is_positive()) {
             Err(Error::SignMismatch)
@@ -129,6 +129,9 @@ impl ErrorTrait for Error {
         }
     }
 }
+
+use std::result;
+pub type Result<T> = result::Result<T, Error>;
 
 
 #[derive(PartialEq, Copy, Clone)]
