@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 pub use cal::compounds::{YearMonth};
-pub use cal::local::{split_cycles};
+pub use util::split_cycles;
 
 use self::Month::*;
 use self::Weekday::*;
@@ -10,7 +10,7 @@ use self::Weekday::*;
 /// A single year.
 ///
 /// This is just a wrapper around `i64` that performs year-related tests.
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
 pub struct Year(pub i64);
 
 impl Year {

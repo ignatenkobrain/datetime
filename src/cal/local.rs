@@ -9,10 +9,11 @@ use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
 use cal::units::{Year, Month, Weekday};
 use cal::units::Month::*;
+use cal::compounds::{YearMonthDay};
 use duration::Duration;
 use instant::Instant;
 use system::sys_time;
-use util::RangeExt;
+use util::{RangeExt, split_cycles};
 
 
 /// Number of days guaranteed to be in four years.
@@ -81,7 +82,7 @@ const TIME_TRIANGLE: &'static [i64; 11] =
 /// zone*.
 #[derive(Eq, Clone, Copy)]
 pub struct Date {
-    ymd:     YMD,
+    ymd:     YearMonthDay,
     yearday: i16,
     weekday: Weekday,
 }
@@ -131,8 +132,7 @@ impl Date {
     /// assert!(Date::ymd(2100, Month::February, 29).is_err());
     /// ```
     pub fn ymd(year: i64, month: Month, day: i8) -> Result<Date> {
-        YMD { year: year, month: month, day: day }
-            .to_days_since_epoch()
+        days_since_epoch(YearMonthDay { year: Year(year), month: month, day: day })
             .map(|days| Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
     }
 
@@ -158,8 +158,8 @@ impl Date {
     /// ```
     pub fn yd(year: i64, yearday: i64) -> Result<Date> {
         if yearday.is_within(0..367) {
-            let jan_1 = YMD { year: year, month: January, day: 1 };
-            let days = try!(jan_1.to_days_since_epoch());
+            let jan_1 = YearMonthDay { year: Year(year), month: January, day: 1 };
+            let days = try!(days_since_epoch(jan_1));
             Ok(Date::from_days_since_epoch(days + yearday - 1 - EPOCH_DIFFERENCE))
         }
         else {
@@ -209,8 +209,8 @@ impl Date {
     /// assert_eq!(date.weekday(), Weekday::Sunday);
     /// ```
     pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<Date> {
-        let jan_4 = YMD { year: year, month: January, day: 4 };
-        let correction = days_to_weekday(jan_4.to_days_since_epoch().unwrap() - EPOCH_DIFFERENCE)
+        let jan_4 = YearMonthDay { year: Year(year), month: January, day: 4 };
+        let correction = days_to_weekday(days_since_epoch(jan_4).unwrap() - EPOCH_DIFFERENCE)
             .days_from_monday_as_one() as i64 + 3;
 
         let yearday = 7 * week + weekday.days_from_monday_as_one() as i64 - correction;
@@ -339,8 +339,8 @@ impl Date {
         Date {
             yearday: (day_of_year + 1) as i16,
             weekday: days_to_weekday(days),
-            ymd: YMD {
-                year:  years + 2000,
+            ymd: YearMonthDay {
+                year:  Year(years + 2000),
                 month: month_variant,
                 day:   (month_days + 1) as i8,
             },
@@ -360,7 +360,7 @@ impl Date {
     /// (technically) uses unsafe components.
     pub unsafe fn _new_with_prefilled_values(year: i64, month: Month, day: i8, weekday: Weekday, yearday: i16) -> Date {
         Date {
-            ymd: YMD { year: year, month: month, day: day },
+            ymd: YearMonthDay { year: Year(year), month: month, day: day },
             weekday: weekday,
             yearday: yearday,
         }
@@ -371,7 +371,7 @@ impl Date {
 }
 
 impl DatePiece for Date {
-    fn year(&self) -> i64 { self.ymd.year }
+    fn year(&self) -> i64 { self.ymd.year.0 }
     fn month(&self) -> Month { self.ymd.month }
     fn day(&self) -> i8 { self.ymd.day }
     fn yearday(&self) -> i16 { self.yearday }
@@ -550,7 +550,7 @@ impl DateTime {
     }
 
     pub fn to_instant(&self) -> Instant {
-        let seconds = self.date.ymd.to_days_since_epoch().unwrap() * SECONDS_IN_DAY
+        let seconds = days_since_epoch(self.date.ymd).unwrap() * SECONDS_IN_DAY
             + self.time.to_seconds();
 
         Instant::at_ms(seconds, self.time.millisecond)
@@ -562,7 +562,7 @@ impl DateTime {
 }
 
 impl DatePiece for DateTime {
-    fn year(&self) -> i64 { self.date.ymd.year }
+    fn year(&self) -> i64 { self.date.ymd.year.0 }
     fn month(&self) -> Month { self.date.ymd.month }
     fn day(&self) -> i8 { self.date.ymd.day }
     fn yearday(&self) -> i16 { self.date.yearday }
@@ -599,75 +599,39 @@ impl Sub<Duration> for DateTime {
 }
 
 
-/// A **YMD** is an implementation detail of Date. It provides
-/// helper methods relating to the construction of Date instances.
-///
-/// The main difference is that while all Dates get checked for
-/// validity before they are used, there is no such check for YMD. The
-/// interface to Date ensures that it should be impossible to
-/// create an instance of the 74th of March, for example, but you’re
-/// free to create such an instance of YMD. For this reason, it is not
-/// exposed to implementors of this library.
-#[derive(PartialEq, PartialOrd, Eq, Ord, Clone, Debug, Copy)]
-struct YMD {
-    year:    i64,
-    month:   Month,
-    day:     i8,
-}
+pub fn days_since_epoch(ymd: YearMonthDay) -> Result<i64> {
+    let years = ymd.year.0 - 2000;
+    let (leap_days_elapsed, is_leap_year) = ymd.year.leap_year_calculations();
 
-impl YMD {
-
-    /// Calculates the number of days that have elapsed since the 1st
-    /// January, 1970. Returns the number of days if this datestamp is
-    /// valid; None otherwise.
-    ///
-    /// This method returns a Result instead of exposing is_valid to
-    /// the user, because the leap year calculations are used in both
-    /// functions, so it makes more sense to only do them once.
-    pub fn to_days_since_epoch(&self) -> Result<i64> {
-        let years = self.year - 2000;
-        let (leap_days_elapsed, is_leap_year) = Year(self.year).leap_year_calculations();
-
-        if !self.is_valid(is_leap_year) {
-            return Err(Error::OutOfRange);
-        }
-
-        // Work out the number of days from the start of 1970 to now,
-        // which is a multiple of the number of years...
-        let days = years * 365
-
-            // Plus the number of days between the start of 2000 and the
-            // start of 1970, to make up the difference because our
-            // dates start at 2000 and instants start at 1970...
-            + 10958
-
-            // Plus the number of leap years that have elapsed between
-            // now and the start of 2000...
-            + leap_days_elapsed
-
-            // Plus the number of days in all the months leading up to
-            // the current month...
-            + self.month.days_before_start() as i64
-
-            // Plus an extra leap day for *this* year...
-            + if is_leap_year && self.month >= March { 1 } else { 0 }
-
-            // Plus the number of days in the month so far! (Days are
-            // 1-indexed, so we make them 0-indexed here)
-            + (self.day - 1) as i64;
-
-        Ok(days)
+    if !ymd.is_valid(is_leap_year) {
+        return Err(Error::OutOfRange);
     }
 
-    /// Returns whether this datestamp is valid, which basically means
-    /// whether the day is in the range allowed by the month.
-    ///
-    /// Whether the current year is a leap year should already have been
-    /// calculated at this point, so the value is passed in rather than
-    /// calculating it afresh.
-    pub fn is_valid(&self, is_leap_year: bool) -> bool {
-        self.day >= 1 && self.day <= self.month.days_in_month(is_leap_year)
-    }
+    // Work out the number of days from the start of 1970 to now,
+    // which is a multiple of the number of years...
+    let days = years * 365
+
+        // Plus the number of days between the start of 2000 and the
+        // start of 1970, to make up the difference because our
+        // dates start at 2000 and instants start at 1970...
+        + 10958
+
+        // Plus the number of leap years that have elapsed between
+        // now and the start of 2000...
+        + leap_days_elapsed
+
+        // Plus the number of days in all the months leading up to
+        // the current month...
+        + ymd.month.days_before_start() as i64
+
+        // Plus an extra leap day for *this* year...
+        + if is_leap_year && ymd.month >= March { 1 } else { 0 }
+
+        // Plus the number of days in the month so far! (Days are
+        // 1-indexed, so we make them 0-indexed here)
+        + (ymd.day - 1) as i64;
+
+    Ok(days)
 }
 
 /// Computes the weekday, given the number of days that have passed
@@ -680,25 +644,6 @@ fn days_to_weekday(days: i64) -> Weekday {
     Weekday::from_zero(if weekday < 0 { weekday + 7 } else { weekday } as i8).unwrap()
 }
 
-/// Split a number of years into a number of year-cycles, and the number
-/// of years left over that don’t fit into a cycle. This is also used
-/// for day-cycles.
-///
-/// This is essentially a division operation with the result and the
-/// remainder, with the difference that a negative value gets ‘wrapped
-/// around’ to be a positive value, owing to the way the modulo operator
-/// works for negative values.
-pub fn split_cycles(number_of_periods: i64, cycle_length: i64) -> (i64, i64) {
-    let mut cycles    = number_of_periods / cycle_length;
-    let mut remainder = number_of_periods % cycle_length;
-
-    if remainder < 0 {
-        remainder += cycle_length;
-        cycles    -= 1;
-    }
-
-    (cycles, remainder)
-}
 
 
 #[derive(PartialEq, Debug, Copy, Clone)]
@@ -725,7 +670,7 @@ pub type Result<T> = result::Result<T, Error>;
 /// Misc tests that don’t seem to fit anywhere.
 #[cfg(test)]
 mod test {
-    pub use super::{DateTime, Date, Time};
+    pub use super::{DateTime, Date, Time, days_since_epoch};
     pub use cal::units::{Month, Weekday, Year};
     pub use cal::DatePiece;
     pub use std::str::FromStr;
@@ -776,7 +721,7 @@ mod test {
         ]{
             assert_eq!( date,
                 Date::from_days_since_epoch(
-                    date.ymd.to_days_since_epoch().unwrap() - epoch_difference));
+                    days_since_epoch(date.ymd).unwrap() - epoch_difference));
         }
     }
 
