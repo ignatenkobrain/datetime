@@ -1,5 +1,5 @@
 extern crate datetime;
-use datetime::zone::{StaticTimeZone, FixedTimespanSet, FixedTimespan, TimeZoneSource, TimeZone};
+use datetime::zone::{StaticTimeZone, FixedTimespanSet, FixedTimespan, TimeZone, Source as TimeZoneSource};
 use datetime::local::{DateTime, Date, Time};
 use datetime::{Month, DatePiece, TimePiece};
 use std::borrow::Cow;

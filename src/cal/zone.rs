@@ -14,10 +14,10 @@ use util::RangeExt;
 /// A **time zone**, which here is a list of timespans, each containing a
 /// fixed offset for the current location’s time from UTC.
 #[derive(Debug, Clone)]
-pub struct TimeZone(pub TimeZoneSource<'static>);
+pub struct TimeZone(pub Source<'static>);
 
 #[derive(Debug, Clone)]
-pub enum TimeZoneSource<'a> {
+pub enum Source<'a> {
     Static(&'a StaticTimeZone<'a>),
     Runtime(Arc<runtime::OwnedTimeZone>),
 }
@@ -36,8 +36,8 @@ impl TimeZone {
 
     pub fn zone_name(&self) -> Option<&str> {
         match self.0 {
-            TimeZoneSource::Static(ref tz)   => Some(tz.name),
-            TimeZoneSource::Runtime(ref arc) => arc.name.as_ref().map(|x| &**x),
+            Source::Static(ref tz)   => Some(tz.name),
+            Source::Runtime(ref arc) => arc.name.as_ref().map(|x| &**x),
         }
     }
 
@@ -45,8 +45,8 @@ impl TimeZone {
     /// has at the given datetime.
     pub fn offset(&self, datetime: local::DateTime) -> i64 {
         match self.0 {
-            TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.offset(datetime),
-            TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().offset(datetime),
+            Source::Static(ref tz)   => tz.fixed_timespans.offset(datetime),
+            Source::Runtime(ref arc) => arc.fixed_timespans.borrow().offset(datetime),
         }
     }
 
@@ -55,8 +55,8 @@ impl TimeZone {
     /// should only be used when referring to a known timezone.
     pub fn name(&self, datetime: local::DateTime) -> String {
         match self.0 {
-            TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.name(datetime),
-            TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().name(datetime),
+            Source::Static(ref tz)   => tz.fixed_timespans.name(datetime),
+            Source::Runtime(ref arc) => arc.fixed_timespans.borrow().name(datetime),
         }
     }
 
@@ -69,8 +69,8 @@ impl TimeZone {
     /// a geographical location.
     pub fn is_fixed(&self) -> bool {
         match self.0 {
-            TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.is_fixed(),
-            TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().is_fixed(),
+            Source::Static(ref tz)   => tz.fixed_timespans.is_fixed(),
+            Source::Runtime(ref arc) => arc.fixed_timespans.borrow().is_fixed(),
         }
     }
 
@@ -98,8 +98,8 @@ impl TimeZone {
     /// to watch out for.
     pub fn convert_local(&self, local: local::DateTime) -> LocalTimes {
         match self.0 {
-            TimeZoneSource::Static(ref tz)   => tz.fixed_timespans.convert_local(local, self.0.clone()),
-            TimeZoneSource::Runtime(ref arc) => arc.fixed_timespans.borrow().convert_local(local, self.0.clone()),
+            Source::Static(ref tz)   => tz.fixed_timespans.convert_local(local, self.0.clone()),
+            Source::Runtime(ref arc) => arc.fixed_timespans.borrow().convert_local(local, self.0.clone()),
         }
     }
 }
@@ -164,10 +164,10 @@ impl<'a> FixedTimespanSet<'a> {
         self.rest.is_empty()
     }
 
-    fn convert_local(&self, local: local::DateTime, source: TimeZoneSource<'a>) -> LocalTimes<'a> {
+    fn convert_local(&self, local: local::DateTime, source: Source<'a>) -> LocalTimes<'a> {
         let unix_timestamp = local.to_instant().seconds();
 
-        let zonify = |offset| ZonedDateTime {
+        let zonify = |offset| DateTime {
             adjusted: local,
             current_offset: offset,
             time_zone: source.clone(),
@@ -278,11 +278,11 @@ pub enum LocalTimes<'a> {
     Impossible,
 
     /// This local time can be defined unambiguously.
-    Precise(ZonedDateTime<'a>),
+    Precise(DateTime<'a>),
 
     /// This local time is ambiguous (when a time overlaps two timespans,
     /// which happens twice on a wall clock rather than once).
-    Ambiguous { earlier: ZonedDateTime<'a>, later: ZonedDateTime<'a> },
+    Ambiguous { earlier: DateTime<'a>, later: DateTime<'a> },
 }
 
 impl<'a> LocalTimes<'a> {
@@ -292,7 +292,7 @@ impl<'a> LocalTimes<'a> {
     /// It is almost always preferable to use pattern matching on a
     /// `LocalTimes` value and handle the impossible/ambiguous cases
     /// explicitly, rather than risking a panic.
-    pub fn unwrap_precise(self) -> ZonedDateTime<'a> {
+    pub fn unwrap_precise(self) -> DateTime<'a> {
         match self {
             LocalTimes::Precise(p)        => p,
             LocalTimes::Impossible        => panic!("called `LocalTimes::unwrap()` on an `Impossible` value"),
@@ -323,19 +323,19 @@ impl<'a> LocalTimes<'a> {
 
 
 #[derive(Debug)]
-pub struct ZonedDateTime<'a> {
+pub struct DateTime<'a> {
     adjusted: local::DateTime,
     current_offset: i64,
-    time_zone: TimeZoneSource<'a>,
+    time_zone: Source<'a>,
 }
 
-impl<'a> ZonedDateTime<'a> {
+impl<'a> DateTime<'a> {
     pub fn to_instant(&self) -> Instant {
         (self.adjusted - Duration::of(self.current_offset)).to_instant()
     }
 }
 
-impl<'a> DatePiece for ZonedDateTime<'a> {
+impl<'a> DatePiece for DateTime<'a> {
     fn year(&self) -> i64 { self.adjusted.year() }
     fn month(&self) -> Month { self.adjusted.month() }
     fn day(&self) -> i8 { self.adjusted.day() }
@@ -343,7 +343,7 @@ impl<'a> DatePiece for ZonedDateTime<'a> {
     fn weekday(&self) -> Weekday { self.adjusted.weekday() }
 }
 
-impl<'a> TimePiece for ZonedDateTime<'a> {
+impl<'a> TimePiece for DateTime<'a> {
     fn hour(&self) -> i8 { self.adjusted.hour() }
     fn minute(&self) -> i8 { self.adjusted.minute() }
     fn second(&self) -> i8 { self.adjusted.second() }
