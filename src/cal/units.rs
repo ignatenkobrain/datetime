@@ -73,6 +73,12 @@ impl Year {
     }
 }
 
+impl From<i64> for Year {
+    fn from(year: i64) -> Year {
+        Year(year)
+    }
+}
+
 impl Deref for Year {
     type Target = i64;
 

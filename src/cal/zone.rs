@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use cal::{DatePiece, TimePiece};
 use cal::local;
-use cal::units::{Month, Weekday};
+use cal::units::{Year, Month, Weekday};
 use duration::Duration;
 use instant::Instant;
 use util::RangeExt;
@@ -336,7 +336,7 @@ impl<'a> DateTime<'a> {
 }
 
 impl<'a> DatePiece for DateTime<'a> {
-    fn year(&self) -> i64 { self.adjusted.year() }
+    fn year(&self) -> Year { self.adjusted.year() }
     fn month(&self) -> Month { self.adjusted.month() }
     fn day(&self) -> i8 { self.adjusted.day() }
     fn yearday(&self) -> i16 { self.adjusted.yearday() }

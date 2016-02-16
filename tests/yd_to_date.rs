@@ -1,12 +1,12 @@
 extern crate datetime;
 use datetime::local::Date;
-use datetime::{Month, DatePiece};
+use datetime::{Year, Month, DatePiece};
 
 
 #[test]
 fn day_start_of_year() {
     let date = Date::yd(2015, 1).unwrap();
-    assert_eq!(2015, date.year());
+    assert_eq!(Year::from(2015), date.year());
     assert_eq!(Month::January, date.month());
     assert_eq!(1, date.day());
 }

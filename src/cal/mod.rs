@@ -23,7 +23,7 @@ pub trait DatePiece {
     /// The year, in absolute terms.
     /// This is in human-readable format, so the year 2014 actually has a
     /// year value of 2014, rather than 14 or 114 or anything like that.
-    fn year(&self) -> i64;
+    fn year(&self) -> Year;
 
     /// The month of the year.
     fn month(&self) -> Month;
@@ -39,12 +39,12 @@ pub trait DatePiece {
 
     /// The number of years into the century.
     /// This is the same as the last two digits of the year.
-    fn year_of_century(&self) -> i64 { self.year() % 100 }
+    fn year_of_century(&self) -> i64 { *self.year() % 100 }
 
     /// The year number, relative to the year 2000.
     /// Internally, many routines use years relative the year 2000,
     /// rather than the year 0 (well, 1 BCE).
-    fn years_from_2000(&self) -> i64 { self.year() - 2000 }
+    fn years_from_2000(&self) -> i64 { *self.year() - 2000 }
 
     // I’d ideally like to include “century” here, but there’s some
     // discrepancy over what the result should be: the Gregorian

@@ -34,7 +34,7 @@ impl<'a> Field<'a> {
     fn format<T>(&self, when: &T, w: &mut Vec<u8>, locale: &locale::Time) -> io::Result<()> where T: DatePiece+TimePiece {
         match *self {
             Field::Literal(s)             => w.write_all(s.as_bytes()),
-            Field::Year(a)                => a.format(w, when.year()),
+            Field::Year(a)                => a.format(w, *when.year()),
             Field::YearOfCentury(a)       => a.format(w, when.year_of_century()),
             Field::MonthName(true, a)     => a.format(w, &locale.long_month_name(when.month() as usize - 1)[..]),
             Field::MonthName(false, a)    => a.format(w, &locale.short_month_name(when.month() as usize - 1)[..]),

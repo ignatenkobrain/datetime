@@ -1,7 +1,7 @@
 extern crate datetime;
 use datetime::zone::{StaticTimeZone, FixedTimespanSet, FixedTimespan, TimeZone, Source as TimeZoneSource};
 use datetime::local::{DateTime, Date, Time};
-use datetime::{Month, DatePiece, TimePiece};
+use datetime::{Year, Month, DatePiece, TimePiece};
 use std::borrow::Cow;
 
 
@@ -59,7 +59,7 @@ fn construction() {
     assert_eq!(zone.offset(test_date), 3600);
 
     let zoned_date = zone.convert_local(test_date).unwrap_precise();
-    assert_eq!(zoned_date.year(), 2010);
+    assert_eq!(zoned_date.year(), Year::from(2010));
     assert_eq!(zoned_date.hour(), 15);
 
     let instant = DateTime::new(
