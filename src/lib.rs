@@ -24,7 +24,7 @@ pub use cal::compounds::{YearMonth};
 pub use cal::local;
 pub use cal::fmt::custom as fmt;
 pub use cal::fmt::ISO;  // TODO: replace this with just a 'fmt' import
-pub use cal::offset::{Offset, OffsetDateTime};
+pub use cal::offset;
 pub use cal::zone::{TimeZone, ZonedDateTime};
 pub use cal::zone as zone;
 pub use cal::iter;

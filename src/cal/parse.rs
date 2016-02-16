@@ -5,7 +5,7 @@ use std::str::FromStr;
 use iso8601;
 
 use cal::local;
-use cal::offset::{Offset, OffsetDateTime, Error as OffsetError};
+use cal::offset;
 use cal::units::{Month, Weekday};
 
 
@@ -46,18 +46,18 @@ impl FromStr for local::DateTime {
     }
 }
 
-impl FromStr for OffsetDateTime {
-    type Err = Error<OffsetError>;
+impl FromStr for offset::DateTime {
+    type Err = Error<offset::Error>;
 
-    fn from_str(input: &str) -> Result<OffsetDateTime, Self::Err> {
+    fn from_str(input: &str) -> Result<offset::DateTime, Self::Err> {
         let fields = match iso8601::datetime(input) {
             Ok(fields)  => fields,
             Err(e)      => return Err(Error::Parse(e)),
         };
 
-        let date   = try!(fields_to_date(fields.date).map_err(|e| Error::Date(OffsetError::Date(e))));
-        let time   = try!(fields_to_time(fields.time).map_err(|e| Error::Date(OffsetError::Date(e))));
-        let offset = try!(Offset::of_hours_and_minutes(fields.time.tz_offset_hours as i8, fields.time.tz_offset_minutes as i8).map_err(Error::Date));
+        let date   = try!(fields_to_date(fields.date).map_err(|e| Error::Date(offset::Error::Date(e))));
+        let time   = try!(fields_to_time(fields.time).map_err(|e| Error::Date(offset::Error::Date(e))));
+        let offset = try!(offset::Offset::of_hours_and_minutes(fields.time.tz_offset_hours as i8, fields.time.tz_offset_minutes as i8).map_err(Error::Date));
         Ok(offset.transform_date(local::DateTime::new(date, time)))
     }
 }

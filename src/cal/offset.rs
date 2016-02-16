@@ -55,8 +55,8 @@ impl Offset {
         }
     }
 
-    pub fn transform_date(&self, local: local::DateTime) -> OffsetDateTime {
-        OffsetDateTime {
+    pub fn transform_date(&self, local: local::DateTime) -> DateTime {
+        DateTime {
             local: local,
             offset: self.clone(),
         }
@@ -132,12 +132,12 @@ impl ErrorTrait for Error {
 
 
 #[derive(PartialEq, Copy, Clone)]
-pub struct OffsetDateTime {
+pub struct DateTime {
     pub local: local::DateTime,
     pub offset: Offset,
 }
 
-impl DatePiece for OffsetDateTime {
+impl DatePiece for DateTime {
     fn year(&self) -> i64 {
         self.offset.adjust(self.local).year()
     }
@@ -159,7 +159,7 @@ impl DatePiece for OffsetDateTime {
     }
 }
 
-impl TimePiece for OffsetDateTime {
+impl TimePiece for DateTime {
     fn hour(&self) -> i8 {
         self.offset.adjust(self.local).hour()
     }
@@ -177,9 +177,9 @@ impl TimePiece for OffsetDateTime {
     }
 }
 
-impl fmt::Debug for OffsetDateTime {
+impl fmt::Debug for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "OffsetDateTime({})", self.iso())
+        write!(f, "offset::DateTime({})", self.iso())
     }
 }
 
@@ -248,6 +248,6 @@ mod test {
                     local::Time::hms(23, 31, 30).unwrap());
 
         let debugged = format!("{:?}", offset.transform_date(then));
-        assert_eq!(debugged, "OffsetDateTime(2009-02-13T23:31:30.000+00:25:21)");
+        assert_eq!(debugged, "offset::DateTime(2009-02-13T23:31:30.000+00:25:21)");
     }
 }

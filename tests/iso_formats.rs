@@ -53,7 +53,7 @@ mod datetimes {
 
 mod offsets {
     use super::*;
-    use datetime::Offset;
+    use datetime::offset::Offset;
 
     #[test]
     fn zulu() {

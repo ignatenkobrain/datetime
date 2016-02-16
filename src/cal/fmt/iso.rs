@@ -1,6 +1,6 @@
 use std::fmt;
 use cal::{DatePiece, TimePiece};
-use cal::{Offset, OffsetDateTime};
+use cal::offset;
 use cal::local;
 use util::RangeExt;
 
@@ -48,7 +48,7 @@ impl ISO for local::DateTime {
     }
 }
 
-impl ISO for Offset {
+impl ISO for offset::Offset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.is_utc() {
             write!(f, "Z")
@@ -65,7 +65,7 @@ impl ISO for Offset {
     }
 }
 
-impl ISO for OffsetDateTime {
+impl ISO for offset::DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}", self.local.iso(), self.offset.iso())
     }

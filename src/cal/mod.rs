@@ -14,7 +14,6 @@ pub mod iter;
 
 pub use self::compounds::{YearMonth};
 pub use self::units::{Year, Weekday, Month};
-pub use self::offset::{Offset, OffsetDateTime};
 
 
 /// The **date piece** trait is used for date and time values that have
