@@ -11,7 +11,7 @@ use self::Weekday::*;
 ///
 /// This is just a wrapper around `i64` that performs year-related tests.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
-pub struct Year(pub i64);
+pub struct Year(i64);
 
 impl Year {
 
@@ -48,8 +48,8 @@ impl Year {
     /// ```
     /// use datetime::Year;
     ///
-    /// assert_eq!(Year(2000).is_leap_year(), true);
-    /// assert_eq!(Year(1900).is_leap_year(), false);
+    /// assert_eq!(Year::from(2000).is_leap_year(), true);
+    /// assert_eq!(Year::from(1900).is_leap_year(), false);
     /// ```
     pub fn is_leap_year(&self) -> bool {
         self.leap_year_calculations().1
@@ -62,7 +62,7 @@ impl Year {
     /// ```
     /// use datetime::{Year, Month};
     ///
-    /// let expiry_date = Year(2017).month(Month::February);
+    /// let expiry_date = Year::from(2017).month(Month::February);
     /// assert_eq!(*expiry_date.year, 2017);
     /// assert_eq!(expiry_date.month, Month::February);
     /// ```

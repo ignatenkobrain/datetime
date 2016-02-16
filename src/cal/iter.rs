@@ -33,7 +33,7 @@ pub trait MonthsIter {
     /// use datetime::Month::{April, June};
     /// use datetime::iter::MonthsIter;
     ///
-    /// let year = Year(1999);
+    /// let year = Year::from(1999);
     /// assert_eq!(year.months(..).count(), 12);
     /// assert_eq!(year.months(April ..).count(), 9);
     /// assert_eq!(year.months(April .. June).count(), 2);
@@ -122,7 +122,7 @@ impl DoubleEndedIterator for YearMonths {
 
 impl fmt::Debug for YearMonths {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "YearMonths({}, {:?})", self.year.0, self.iter.as_slice())
+        write!(f, "YearMonths({}, {:?})", *self.year, self.iter.as_slice())
     }
 }
 
@@ -139,7 +139,7 @@ pub trait DaysIter {
     /// use datetime::Month::September;
     /// use datetime::iter::DaysIter;
     ///
-    /// let ym = Year(1999).month(September);
+    /// let ym = Year::from(1999).month(September);
     /// assert_eq!(ym.days(..).count(), 30);
     /// assert_eq!(ym.days(10 ..).count(), 21);
     /// assert_eq!(ym.days(10 .. 20).count(), 10);
@@ -202,12 +202,12 @@ impl Iterator for MonthDays {
     type Item = local::Date;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.range.next().and_then(|d| local::Date::ymd(self.ym.year.0, self.ym.month, d).ok())
+        self.range.next().and_then(|d| local::Date::ymd(self.ym.year, self.ym.month, d).ok())
     }
 }
 
 impl DoubleEndedIterator for MonthDays {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.range.next_back().and_then(|d| local::Date::ymd(self.ym.year.0, self.ym.month, d).ok())
+        self.range.next_back().and_then(|d| local::Date::ymd(self.ym.year, self.ym.month, d).ok())
     }
 }

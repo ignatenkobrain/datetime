@@ -8,7 +8,7 @@ mod months {
 
     #[test]
     fn range_full() {
-        let year = Year(2013);
+        let year = Year::from(2013);
         let months: Vec<_> = year.months(..).collect();
         assert_eq!(months, vec![
             year.month(January),
@@ -28,7 +28,7 @@ mod months {
 
     #[test]
     fn range_from() {
-        let year = Year(2013);
+        let year = Year::from(2013);
         let months: Vec<_> = year.months(July..).collect();
         assert_eq!(months, vec![
             year.month(July),
@@ -42,7 +42,7 @@ mod months {
 
     #[test]
     fn range_to() {
-        let year = Year(2013);
+        let year = Year::from(2013);
         let months: Vec<_> = year.months(..July).collect();
         assert_eq!(months, vec![
             year.month(January),
@@ -56,7 +56,7 @@ mod months {
 
     #[test]
     fn range() {
-        let year = Year(2013);
+        let year = Year::from(2013);
         let months: Vec<_> = year.months(April..July).collect();
         assert_eq!(months, vec![
             year.month(April),
@@ -67,14 +67,14 @@ mod months {
 
     #[test]
     fn range_empty() {
-        let year = Year(2013);
+        let year = Year::from(2013);
         let months: Vec<_> = year.months(August..August).collect();
         assert!(months.is_empty());
     }
 
     #[test]
     fn range_singular() {
-        let year = Year(2013);
+        let year = Year::from(2013);
         let months = year.month(April);
         assert_eq!(months, year.month(April));
     }
@@ -87,7 +87,7 @@ mod days {
 
     #[test]
     fn range_full() {
-        let year = Year(2013).month(February);
+        let year = Year::from(2013).month(February);
         let days: Vec<_> = year.days(..).collect();
         let results: Vec<_> = (1..29).map(|d| Date::ymd(2013, February, d).unwrap()).collect();
         assert_eq!(days, results);
@@ -95,7 +95,7 @@ mod days {
 
     #[test]
     fn range_full_leap_year() {
-        let year = Year(2000).month(February);
+        let year = Year::from(2000).month(February);
         let days: Vec<_> = year.days(..).collect();
         let results: Vec<_> = (1..30).map(|d| Date::ymd(2000, February, d).unwrap()).collect();
         assert_eq!(days, results);
@@ -103,7 +103,7 @@ mod days {
 
     #[test]
     fn range() {
-        let year = Year(2008).month(March);
+        let year = Year::from(2008).month(March);
         let days: Vec<_> = year.days(10..20).collect();
         let results: Vec<_> = (10..20).map(|d| Date::ymd(2008, March, d).unwrap()).collect();
         assert_eq!(days, results);
@@ -111,14 +111,14 @@ mod days {
 
     #[test]
     fn just_for_one_day() {
-        let day = Year(1066).month(October).day(14);
+        let day = Year::from(1066).month(October).day(14);
         assert_eq!(day, Date::ymd(1066, October, 14));
     }
 }
 
 #[test]
 fn entire_year() {
-    let count = Year(1999).months(..)
+    let count = Year::from(1999).months(..)
                           .flat_map(|m| m.days(..))
                           .count();
 
@@ -127,7 +127,7 @@ fn entire_year() {
 
 #[test]
 fn entire_leap_year() {
-    let count = Year(2000).months(..)
+    let count = Year::from(2000).months(..)
                           .flat_map(|m| m.days(..))
                           .count();
 

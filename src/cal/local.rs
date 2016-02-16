@@ -376,7 +376,7 @@ impl Date {
             yearday: (day_of_year + 1) as i16,
             weekday: days_to_weekday(days),
             ymd: YearMonthDay {
-                year:  Year(years + 2000),
+                year:  Year::from(years + 2000),
                 month: month_variant,
                 day:   (month_days + 1) as i8,
             },
@@ -396,7 +396,7 @@ impl Date {
     /// (technically) uses unsafe components.
     pub unsafe fn _new_with_prefilled_values(year: i64, month: Month, day: i8, weekday: Weekday, yearday: i16) -> Date {
         Date {
-            ymd: YearMonthDay { year: Year(year), month: month, day: day },
+            ymd: YearMonthDay { year: year.into(), month: month, day: day },
             weekday: weekday,
             yearday: yearday,
         }
@@ -636,7 +636,7 @@ impl Sub<Duration> for DateTime {
 
 
 pub fn days_since_epoch(ymd: YearMonthDay) -> Result<i64> {
-    let years = ymd.year.0 - 2000;
+    let years = *ymd.year - 2000;
     let (leap_days_elapsed, is_leap_year) = ymd.year.leap_year_calculations();
 
     if !ymd.is_valid(is_leap_year) {
