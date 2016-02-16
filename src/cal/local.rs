@@ -210,7 +210,8 @@ impl Date {
     /// ```
     pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<Date> {
         let jan_4 = YMD { year: year, month: January, day: 4 };
-        let correction = days_to_weekday(jan_4.to_days_since_epoch().unwrap() - EPOCH_DIFFERENCE).days_from_monday_as_one() as i64 + 3;
+        let correction = days_to_weekday(jan_4.to_days_since_epoch().unwrap() - EPOCH_DIFFERENCE)
+            .days_from_monday_as_one() as i64 + 3;
 
         let yearday = 7 * week + weekday.days_from_monday_as_one() as i64 - correction;
 
@@ -549,7 +550,9 @@ impl DateTime {
     }
 
     pub fn to_instant(&self) -> Instant {
-        let seconds = self.date.ymd.to_days_since_epoch().unwrap() * SECONDS_IN_DAY + self.time.to_seconds();
+        let seconds = self.date.ymd.to_days_since_epoch().unwrap() * SECONDS_IN_DAY
+            + self.time.to_seconds();
+
         Instant::at_ms(seconds, self.time.millisecond)
     }
 
@@ -742,10 +745,18 @@ mod test {
     #[test]
     fn new() {
         for year in 1..3000 {
-            assert!(Date::ymd(year, Month::from_one( 1).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 2).unwrap(), 30).is_err()); assert!(Date::ymd(year, Month::from_one( 3).unwrap(), 32).is_err());
-            assert!(Date::ymd(year, Month::from_one( 4).unwrap(), 31).is_err()); assert!(Date::ymd(year, Month::from_one( 5).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 6).unwrap(), 31).is_err());
-            assert!(Date::ymd(year, Month::from_one( 7).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 8).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one( 9).unwrap(), 31).is_err());
-            assert!(Date::ymd(year, Month::from_one(10).unwrap(), 32).is_err()); assert!(Date::ymd(year, Month::from_one(11).unwrap(), 31).is_err()); assert!(Date::ymd(year, Month::from_one(12).unwrap(), 32).is_err());
+            assert!(Date::ymd(year, Month::January,   32).is_err());
+            assert!(Date::ymd(year, Month::February,  30).is_err());
+            assert!(Date::ymd(year, Month::March,     32).is_err());
+            assert!(Date::ymd(year, Month::April,     31).is_err());
+            assert!(Date::ymd(year, Month::May,       32).is_err());
+            assert!(Date::ymd(year, Month::June,      31).is_err());
+            assert!(Date::ymd(year, Month::July,      32).is_err());
+            assert!(Date::ymd(year, Month::August,    32).is_err());
+            assert!(Date::ymd(year, Month::September, 31).is_err());
+            assert!(Date::ymd(year, Month::October,   32).is_err());
+            assert!(Date::ymd(year, Month::November,  31).is_err());
+            assert!(Date::ymd(year, Month::December,  32).is_err());
         }
     }
 
@@ -753,15 +764,15 @@ mod test {
     fn to_from_days_since_epoch() {
         let epoch_difference: i64 = 30 * 365 + 7 + 31 + 29;  // see EPOCH_DIFFERENCE
         for date in  vec![
-            Date::ymd(1970, Month::from_one(01).unwrap(), 01).unwrap(),
-            Date::ymd(  01, Month::from_one(01).unwrap(), 01).unwrap(),
-            Date::ymd(1971, Month::from_one(01).unwrap(), 01).unwrap(),
-            Date::ymd(1973, Month::from_one(01).unwrap(), 01).unwrap(),
-            Date::ymd(1977, Month::from_one(01).unwrap(), 01).unwrap(),
-            Date::ymd(1989, Month::from_one(11).unwrap(), 10).unwrap(),
-            Date::ymd(1990, Month::from_one( 7).unwrap(),  8).unwrap(),
-            Date::ymd(2014, Month::from_one( 7).unwrap(), 13).unwrap(),
-            Date::ymd(2001, Month::from_one( 2).unwrap(), 03).unwrap()
+            Date::ymd(1970, Month::January,   1).unwrap(),
+            Date::ymd(  01, Month::January,   1).unwrap(),
+            Date::ymd(1971, Month::January,   1).unwrap(),
+            Date::ymd(1973, Month::January,   1).unwrap(),
+            Date::ymd(1977, Month::January,   1).unwrap(),
+            Date::ymd(1989, Month::November, 10).unwrap(),
+            Date::ymd(1990, Month::July,      8).unwrap(),
+            Date::ymd(2014, Month::July,     13).unwrap(),
+            Date::ymd(2001, Month::February,  3).unwrap()
         ]{
             assert_eq!( date,
                 Date::from_days_since_epoch(
