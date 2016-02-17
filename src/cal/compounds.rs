@@ -21,8 +21,8 @@ impl YearMonth {
     /// use datetime::Year;
     /// use datetime::Month::February;
     ///
-    /// assert_eq!(Year(2000).month(February).day_count(), 29);
-    /// assert_eq!(Year(1900).month(February).day_count(), 28);
+    /// assert_eq!(Year::from(2000).month(February).day_count(), 29);
+    /// assert_eq!(Year::from(1900).month(February).day_count(), 28);
     /// ```
     pub fn day_count(&self) -> i8 {
         self.month.days_in_month(self.year.is_leap_year())
@@ -32,7 +32,7 @@ impl YearMonth {
     ///
     /// This is just a short-cut for the `local::Date::ymd` constructor.
     pub fn day(&self, day: i8) -> local::Result<local::Date> {
-        local::Date::ymd(self.year.0, self.month, day)
+        local::Date::ymd(self.year, self.month, day)
     }
 }
 

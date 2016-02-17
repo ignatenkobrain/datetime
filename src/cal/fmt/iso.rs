@@ -24,7 +24,7 @@ where T: ISO {
 
 impl ISO for local::Date {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let year = self.year();
+        let year = *self.year();
         if year.is_within(0 .. 9999) {
             write!(f, "{:04}-{:02}-{:02}", year, self.month() as usize, self.day())
         }

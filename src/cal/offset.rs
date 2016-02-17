@@ -6,7 +6,7 @@ use std::fmt;
 use cal::{DatePiece, TimePiece};
 use cal::local;
 use cal::fmt::ISO;
-use cal::units::{Month, Weekday};
+use cal::units::{Year, Month, Weekday};
 use duration::Duration;
 use util::RangeExt;
 
@@ -141,7 +141,7 @@ pub struct DateTime {
 }
 
 impl DatePiece for DateTime {
-    fn year(&self) -> i64 {
+    fn year(&self) -> Year {
         self.offset.adjust(self.local).year()
     }
 

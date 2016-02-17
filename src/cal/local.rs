@@ -121,18 +121,33 @@ impl Date {
     ///
     /// ```rust
     /// use datetime::local::Date;
-    /// use datetime::Month;
+    /// use datetime::{Year, Month};
     /// use datetime::DatePiece;
     ///
     /// let date = Date::ymd(1969, Month::July, 20).unwrap();
-    /// assert_eq!(date.year(), 1969);
+    /// assert_eq!(date.year(), Year::from(1969));
     /// assert_eq!(date.month(), Month::July);
     /// assert_eq!(date.day(), 20);
     ///
     /// assert!(Date::ymd(2100, Month::February, 29).is_err());
     /// ```
-    pub fn ymd(year: i64, month: Month, day: i8) -> Result<Date> {
-        days_since_epoch(YearMonthDay { year: Year(year), month: month, day: day })
+    ///
+    /// ### Overloading
+    ///
+    /// If you already have a `Year` value, you can pass it in without having
+    /// to dereference it to get the actual year number.
+    ///
+    /// ```
+    /// use datetime::{Year, Month, DatePiece};
+    /// use datetime::local::Date;
+    ///
+    /// let year = Year::from(1969);
+    /// let date = Date::ymd(year, Month::July, 20).unwrap();
+    /// assert_eq!(date.year(), year);
+    /// ```
+    pub fn ymd<Y>(year: Y, month: Month, day: i8) -> Result<Date>
+    where Y: Into<Year> {
+        days_since_epoch(YearMonthDay { year: year.into(), month: month, day: day })
             .map(|days| Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
     }
 
@@ -149,16 +164,34 @@ impl Date {
     ///
     /// ```rust
     /// use datetime::local::Date;
-    /// use datetime::{Weekday, Month, DatePiece};
+    /// use datetime::{Year, Weekday, Month, DatePiece};
     ///
     /// let date = Date::yd(2015, 0x100).unwrap();
-    /// assert_eq!(date.year(), 2015);
+    /// assert_eq!(date.year(), Year::from(2015));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 13);
     /// ```
-    pub fn yd(year: i64, yearday: i64) -> Result<Date> {
+    ///
+    /// ### Overloading
+    ///
+    /// If you already have a `Year` value, you can pass it in without having
+    /// to dereference it to get the actual year number.
+    ///
+    /// ```
+    /// use datetime::{Year, Month, DatePiece};
+    /// use datetime::local::Date;
+    ///
+    /// let year = Year::from(2015);
+    /// let date = Date::yd(year, 0x100).unwrap();
+    /// assert_eq!(date.year(), year);
+    /// ```
+
+    pub fn yd<Y>(year: Y, yearday: i64) -> Result<Date>
+    where Y: Into<Year> {
+        let year = year.into();
+
         if yearday.is_within(0..367) {
-            let jan_1 = YearMonthDay { year: Year(year), month: January, day: 1 };
+            let jan_1 = YearMonthDay { year: year, month: January, day: 1 };
             let days = try!(days_since_epoch(jan_1));
             Ok(Date::from_days_since_epoch(days + yearday - 1 - EPOCH_DIFFERENCE))
         }
@@ -180,10 +213,10 @@ impl Date {
     ///
     /// ```rust
     /// use datetime::local::Date;
-    /// use datetime::{Weekday, Month, DatePiece};
+    /// use datetime::{Year, Weekday, Month, DatePiece};
     ///
     /// let date = Date::ywd(2015, 37, Weekday::Friday).unwrap();
-    /// assert_eq!(date.year(), 2015);
+    /// assert_eq!(date.year(), Year::from(2015));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 11);
     /// assert_eq!(date.weekday(), Weekday::Friday);
@@ -194,36 +227,39 @@ impl Date {
     ///
     /// ```rust
     /// use datetime::local::Date;
-    /// use datetime::{Weekday, Month, DatePiece};
+    /// use datetime::{Year, Weekday, Month, DatePiece};
     ///
     /// let date = Date::ywd(2009, 1, Weekday::Monday).unwrap();
-    /// assert_eq!(date.year(), 2008);
+    /// assert_eq!(date.year(), Year::from(2008));
     /// assert_eq!(date.month(), Month::December);
     /// assert_eq!(date.day(), 29);
     /// assert_eq!(date.weekday(), Weekday::Monday);
     ///
     /// let date = Date::ywd(2009, 53, Weekday::Sunday).unwrap();
-    /// assert_eq!(date.year(), 2010);
+    /// assert_eq!(date.year(), Year::from(2010));
     /// assert_eq!(date.month(), Month::January);
     /// assert_eq!(date.day(), 3);
     /// assert_eq!(date.weekday(), Weekday::Sunday);
     /// ```
-    pub fn ywd(year: i64, week: i64, weekday: Weekday) -> Result<Date> {
-        let jan_4 = YearMonthDay { year: Year(year), month: January, day: 4 };
+    pub fn ywd<Y>(year: Y, week: i64, weekday: Weekday) -> Result<Date>
+    where Y: Into<Year> {
+        let year = year.into();
+
+        let jan_4 = YearMonthDay { year: year, month: January, day: 4 };
         let correction = days_to_weekday(days_since_epoch(jan_4).unwrap() - EPOCH_DIFFERENCE)
             .days_from_monday_as_one() as i64 + 3;
 
         let yearday = 7 * week + weekday.days_from_monday_as_one() as i64 - correction;
 
         if yearday <= 0 {
-            let days_in_year = if Year(year - 1).is_leap_year() { 366 } else { 365 };
-            Date::yd(year - 1, days_in_year + yearday)
+            let days_in_year = if year.previous_year().is_leap_year() { 366 } else { 365 };
+            Date::yd(*year - 1, days_in_year + yearday)
         }
         else {
-            let days_in_year = if Year(year).is_leap_year() { 366 } else { 365 };
+            let days_in_year = if year.is_leap_year() { 366 } else { 365 };
 
             if yearday >= days_in_year {
-                Date::yd(year + 1, yearday - days_in_year)
+                Date::yd(year.next_year(), yearday - days_in_year)
             }
             else {
                 Date::yd(year, yearday)
@@ -241,10 +277,10 @@ impl Date {
     ///
     /// ```rust
     /// use datetime::local::Date;
-    /// use datetime::{Month, DatePiece};
+    /// use datetime::{Year, Month, DatePiece};
     ///
     /// let date = Date::yd(2015, 268).unwrap();
-    /// assert_eq!(date.year(), 2015);
+    /// assert_eq!(date.year(), Year::from(2015));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 25);
     /// ```
@@ -253,10 +289,10 @@ impl Date {
     ///
     /// ```rust
     /// use datetime::local::Date;
-    /// use datetime::{Month, DatePiece};
+    /// use datetime::{Year, Month, DatePiece};
     ///
     /// let date = Date::yd(2016, 268).unwrap();
-    /// assert_eq!(date.year(), 2016);
+    /// assert_eq!(date.year(), Year::from(2016));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 24);  // not the 25th!
     /// ```
@@ -340,7 +376,7 @@ impl Date {
             yearday: (day_of_year + 1) as i16,
             weekday: days_to_weekday(days),
             ymd: YearMonthDay {
-                year:  Year(years + 2000),
+                year:  Year::from(years + 2000),
                 month: month_variant,
                 day:   (month_days + 1) as i8,
             },
@@ -360,7 +396,7 @@ impl Date {
     /// (technically) uses unsafe components.
     pub unsafe fn _new_with_prefilled_values(year: i64, month: Month, day: i8, weekday: Weekday, yearday: i16) -> Date {
         Date {
-            ymd: YearMonthDay { year: Year(year), month: month, day: day },
+            ymd: YearMonthDay { year: year.into(), month: month, day: day },
             weekday: weekday,
             yearday: yearday,
         }
@@ -371,7 +407,7 @@ impl Date {
 }
 
 impl DatePiece for Date {
-    fn year(&self) -> i64 { self.ymd.year.0 }
+    fn year(&self) -> Year { self.ymd.year }
     fn month(&self) -> Month { self.ymd.month }
     fn day(&self) -> i8 { self.ymd.day }
     fn yearday(&self) -> i16 { self.yearday }
@@ -562,7 +598,7 @@ impl DateTime {
 }
 
 impl DatePiece for DateTime {
-    fn year(&self) -> i64 { self.date.ymd.year.0 }
+    fn year(&self) -> Year { self.date.ymd.year }
     fn month(&self) -> Month { self.date.ymd.month }
     fn day(&self) -> i8 { self.date.ymd.day }
     fn yearday(&self) -> i16 { self.date.yearday }
@@ -600,7 +636,7 @@ impl Sub<Duration> for DateTime {
 
 
 pub fn days_since_epoch(ymd: YearMonthDay) -> Result<i64> {
-    let years = ymd.year.0 - 2000;
+    let years = *ymd.year - 2000;
     let (leap_days_elapsed, is_leap_year) = ymd.year.leap_year_calculations();
 
     if !ymd.is_valid(is_leap_year) {
