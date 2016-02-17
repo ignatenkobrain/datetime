@@ -94,7 +94,7 @@ impl Offset {
 
 impl fmt::Debug for Offset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Offset({})", self.iso())
+        write!(f, "offset::Offset({})", self.iso())
     }
 }
 
@@ -223,34 +223,5 @@ mod test {
     #[test]
     fn fixed_hm_signs_zero() {
         assert!(Offset::of_hours_and_minutes(4, 0).is_ok());
-    }
-
-    #[test]
-    fn debug_zulu() {
-        let offset = Offset::utc();
-        let debugged = format!("{:?}", offset);
-        assert_eq!(debugged, "Offset(Z)");
-    }
-
-    #[test]
-    fn debug_offset() {
-        let offset = Offset::of_seconds(-25 * 60 - 21).unwrap();
-        let debugged = format!("{:?}", offset);
-        assert_eq!(debugged, "Offset(-00:25:21)");
-    }
-
-    #[test]
-    fn debug_offset_date_time() {
-        use cal::local;
-        use cal::units::Month;
-
-        let offset = Offset::of_seconds(25 * 60 + 21).unwrap();
-
-        let then = local::DateTime::new(
-                    local::Date::ymd(2009, Month::February, 13).unwrap(),
-                    local::Time::hms(23, 31, 30).unwrap());
-
-        let debugged = format!("{:?}", offset.transform_date(then));
-        assert_eq!(debugged, "offset::DateTime(2009-02-13T23:31:30.000+00:25:21)");
     }
 }

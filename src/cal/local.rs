@@ -416,7 +416,7 @@ impl DatePiece for Date {
 
 impl fmt::Debug for Date {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Date({})", self.iso())
+        write!(f, "local::Date({})", self.iso())
     }
 }
 
@@ -526,7 +526,7 @@ impl TimePiece for Time {
 
 impl fmt::Debug for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Time({})", self.iso())
+        write!(f, "local::Time({})", self.iso())
     }
 }
 
@@ -614,7 +614,7 @@ impl TimePiece for DateTime {
 
 impl fmt::Debug for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "DateTime({})", self.iso())
+        write!(f, "local::DateTime({})", self.iso())
     }
 }
 
@@ -758,52 +758,6 @@ mod test {
             assert_eq!( date,
                 Date::from_days_since_epoch(
                     days_since_epoch(date.ymd).unwrap() - epoch_difference));
-        }
-    }
-
-    mod debug {
-        use super::*;
-
-        #[test]
-        fn recently() {
-            let date = Date::ymd(1600, Month::February, 28).unwrap();
-            let debugged = format!("{:?}", date);
-
-            assert_eq!(debugged, "Date(1600-02-28)");
-        }
-
-        #[test]
-        fn just_then() {
-            let date = Date::ymd(-753, Month::December, 1).unwrap();
-            let debugged = format!("{:?}", date);
-
-            assert_eq!(debugged, "Date(-0753-12-01)");
-        }
-
-        #[test]
-        fn far_far_future() {
-            let date = Date::ymd(10601, Month::January, 31).unwrap();
-            let debugged = format!("{:?}", date);
-
-            assert_eq!(debugged, "Date(+10601-01-31)");
-        }
-
-        #[test]
-        fn midday() {
-            let time = Time::hms(12, 0, 0).unwrap();
-            let debugged = format!("{:?}", time);
-
-            assert_eq!(debugged, "Time(12:00:00.000)");
-        }
-
-        #[test]
-        fn ascending() {
-            let then = DateTime::new(
-                        Date::ymd(2009, Month::February, 13).unwrap(),
-                        Time::hms(23, 31, 30).unwrap());
-            let debugged = format!("{:?}", then);
-
-            assert_eq!(debugged, "DateTime(2009-02-13T23:31:30.000)");
         }
     }
 }
