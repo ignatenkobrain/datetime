@@ -13,7 +13,7 @@ use cal::compounds::{YearMonthDay};
 use duration::Duration;
 use instant::Instant;
 use system::sys_time;
-use util::{RangeExt, split_cycles};
+use util::{self, RangeExt, split_cycles};
 
 
 /// Number of days guaranteed to be in four years.
@@ -147,8 +147,11 @@ impl Date {
     /// ```
     pub fn ymd<Y>(year: Y, month: Month, day: i8) -> Result<Date>
     where Y: Into<Year> {
-        days_since_epoch(YearMonthDay { year: year.into(), month: month, day: day })
-            .map(|days| Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
+        let ymd = YearMonthDay { year: year.into(), month: month, day: day };
+        try!(ymd.check_ranges());
+
+        let days = days_since_epoch(ymd);
+        Ok(Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
     }
 
     /// Creates a new local date instance from the given year and day-of-year
@@ -190,14 +193,12 @@ impl Date {
     where Y: Into<Year> {
         let year = year.into();
 
-        if yearday.is_within(0..367) {
-            let jan_1 = YearMonthDay { year: year, month: January, day: 1 };
-            let days = try!(days_since_epoch(jan_1));
-            Ok(Date::from_days_since_epoch(days + yearday - 1 - EPOCH_DIFFERENCE))
-        }
-        else {
-            Err(Error::OutOfRange)
-        }
+        let days_in_year = if year.is_leap_year() { 367 } else { 366 };
+        try!(yearday.check_range(0..days_in_year));
+
+        let jan_1 = YearMonthDay { year: year, month: January, day: 1 };
+        let days = days_since_epoch(jan_1);
+        Ok(Date::from_days_since_epoch(days + yearday - 1 - EPOCH_DIFFERENCE))
     }
 
     /// Creates a new local date instance from the given year, week-of-year,
@@ -246,7 +247,7 @@ impl Date {
         let year = year.into();
 
         let jan_4 = YearMonthDay { year: year, month: January, day: 4 };
-        let correction = days_to_weekday(days_since_epoch(jan_4).unwrap() - EPOCH_DIFFERENCE)
+        let correction = days_to_weekday(days_since_epoch(jan_4) - EPOCH_DIFFERENCE)
             .days_from_monday_as_one() as i64 + 3;
 
         let yearday = 7 * week + weekday.days_from_monday_as_one() as i64 - correction;
@@ -468,13 +469,13 @@ impl Time {
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
     pub fn hm(hour: i8, minute: i8) -> Result<Time> {
-        if (hour.is_within(0..24) && minute.is_within(0..60))
-        || (hour == 24 && minute == 00) {
-            Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 })
+        if hour == 24 && minute == 0 {
+            return Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 });
         }
-        else {
-            Err(Error::OutOfRange)
-        }
+
+        try!(hour.check_range(0..24));
+        try!(minute.check_range(0..60));
+        Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 })
     }
 
     /// Creates a new timestamp instance with the given hour, minute, and
@@ -483,13 +484,14 @@ impl Time {
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
     pub fn hms(hour: i8, minute: i8, second: i8) -> Result<Time> {
-        if (hour.is_within(0..24) && minute.is_within(0..60) && second.is_within(0..60))
-        || (hour == 24 && minute == 00 && second == 00) {
-            Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 })
+        if hour == 24 && minute == 0 && second == 0 {
+            return Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 });
         }
-        else {
-            Err(Error::OutOfRange)
-        }
+
+        try!(hour.check_range(0..24));
+        try!(minute.check_range(0..60));
+        try!(second.check_range(0..60));
+        Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 })
     }
 
     /// Creates a new timestamp instance with the given hour, minute,
@@ -498,14 +500,12 @@ impl Time {
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
     pub fn hms_ms(hour: i8, minute: i8, second: i8, millisecond: i16) -> Result<Time> {
-        if hour.is_within(0..24)   && minute.is_within(0..60)
-        && second.is_within(0..60) && millisecond.is_within(0..1000)
-        {
-            Ok(Time { hour: hour, minute: minute, second: second, millisecond: millisecond })
-        }
-        else {
-            Err(Error::OutOfRange)
-        }
+        try!(hour.check_range(0..24));
+        try!(minute.check_range(0..60));
+        try!(second.check_range(0..60));
+        try!(millisecond.check_range(0..1000));
+
+        Ok(Time { hour: hour, minute: minute, second: second, millisecond: millisecond })
     }
 
     /// Calculate the number of seconds since midnight this time is at,
@@ -586,7 +586,7 @@ impl DateTime {
     }
 
     pub fn to_instant(&self) -> Instant {
-        let seconds = days_since_epoch(self.date.ymd).unwrap() * SECONDS_IN_DAY
+        let seconds = days_since_epoch(self.date.ymd) * SECONDS_IN_DAY
             + self.time.to_seconds();
 
         Instant::at_ms(seconds, self.time.millisecond)
@@ -635,17 +635,15 @@ impl Sub<Duration> for DateTime {
 }
 
 
-pub fn days_since_epoch(ymd: YearMonthDay) -> Result<i64> {
+/// Assumes the `YearMonthDay` is valid, and will return incorrect answers
+/// when given an invalid one.
+fn days_since_epoch(ymd: YearMonthDay) -> i64 {
     let years = *ymd.year - 2000;
     let (leap_days_elapsed, is_leap_year) = ymd.year.leap_year_calculations();
 
-    if !ymd.is_valid(is_leap_year) {
-        return Err(Error::OutOfRange);
-    }
-
     // Work out the number of days from the start of 1970 to now,
     // which is a multiple of the number of years...
-    let days = years * 365
+    years * 365
 
         // Plus the number of days between the start of 2000 and the
         // start of 1970, to make up the difference because our
@@ -665,9 +663,7 @@ pub fn days_since_epoch(ymd: YearMonthDay) -> Result<i64> {
 
         // Plus the number of days in the month so far! (Days are
         // 1-indexed, so we make them 0-indexed here)
-        + (ymd.day - 1) as i64;
-
-    Ok(days)
+        + (ymd.day - 1) as i64
 }
 
 /// Computes the weekday, given the number of days that have passed
@@ -699,6 +695,13 @@ impl ErrorTrait for Error {
     }
 }
 
+impl From<util::OutOfRange> for Error {
+    fn from(_original: util::OutOfRange) -> Error {
+        Error::OutOfRange
+    }
+}
+
+
 use std::result;
 pub type Result<T> = result::Result<T, Error>;
 
@@ -706,10 +709,8 @@ pub type Result<T> = result::Result<T, Error>;
 /// Misc tests that don’t seem to fit anywhere.
 #[cfg(test)]
 mod test {
-    pub use super::{DateTime, Date, Time, days_since_epoch};
-    pub use cal::units::{Month, Weekday, Year};
-    pub use cal::DatePiece;
-    pub use std::str::FromStr;
+    use super::{Date, days_since_epoch};
+    use cal::units::Month;
 
 
     #[test]
@@ -757,7 +758,7 @@ mod test {
         ]{
             assert_eq!( date,
                 Date::from_days_since_epoch(
-                    days_since_epoch(date.ymd).unwrap() - epoch_difference));
+                    days_since_epoch(date.ymd) - epoch_difference));
         }
     }
 }
