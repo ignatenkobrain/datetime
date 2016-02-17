@@ -64,19 +64,20 @@ impl FromStr for offset::DateTime {
 
 
 fn fields_to_date(fields: iso8601::Date) -> local::Result<local::Date> {
-    if let iso8601::Date::YMD { year, month, day } = fields {
-        let month_variant = try!(Month::from_one(month as i8).ok_or_else(||local::Error::OutOfRange));
-        local::Date::ymd(year as i64, month_variant, day as i8)
-    }
-    else if let iso8601::Date::Week { year, ww, d } = fields {
-        let weekday_variant = try!(Weekday::from_one(d as i8).ok_or_else(||local::Error::OutOfRange));
-        local::Date::ywd(year as i64, ww as i64, weekday_variant)
-    }
-    else if let iso8601::Date::Ordinal { year, ddd } = fields {
-        local::Date::yd(year as i64, ddd as i64)
-    }
-    else {
-        unreachable!()  // should be unnecessary??
+    match fields {
+        iso8601::Date::YMD { year, month, day } => {
+            let month_variant = try!(Month::from_one(month as i8).ok_or_else(||local::Error::OutOfRange));
+            local::Date::ymd(year as i64, month_variant, day as i8)
+        }
+
+        iso8601::Date::Week { year, ww, d } => {
+            let weekday_variant = try!(Weekday::from_one(d as i8).ok_or_else(||local::Error::OutOfRange));
+            local::Date::ywd(year as i64, ww as i64, weekday_variant)
+        }
+
+        iso8601::Date::Ordinal { year, ddd } => {
+            local::Date::yd(year as i64, ddd as i64)
+        }
     }
 }
 
