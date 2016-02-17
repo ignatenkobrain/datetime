@@ -1,10 +1,13 @@
 //! Datetimes with a variable UTC offset, and time zone calculations.
 
 use std::borrow::Cow;
+use std::fmt;
 use std::sync::Arc;
 
 use cal::{DatePiece, TimePiece};
+use cal::fmt::ISO;
 use cal::local;
+use cal::offset::Offset;
 use cal::units::{Year, Month, Weekday};
 use duration::Duration;
 use instant::Instant;
@@ -15,6 +18,12 @@ use util::RangeExt;
 /// fixed offset for the current location’s time from UTC.
 #[derive(Debug, Clone)]
 pub struct TimeZone(pub Source<'static>);
+
+impl From<&'static StaticTimeZone<'static>> for TimeZone {
+    fn from(source: &'static StaticTimeZone<'static>) -> TimeZone {
+        TimeZone(Source::Static(source))
+    }
+}
 
 #[derive(Debug, Clone)]
 pub enum Source<'a> {
@@ -32,14 +41,17 @@ pub struct StaticTimeZone<'a> {
     pub fixed_timespans: FixedTimespanSet<'a>,
 }
 
-impl TimeZone {
-
+impl<'a> Source<'a> {
     pub fn zone_name(&self) -> Option<&str> {
-        match self.0 {
+        match *self {
             Source::Static(ref tz)   => Some(tz.name),
             Source::Runtime(ref arc) => arc.name.as_ref().map(|x| &**x),
         }
     }
+}
+
+
+impl TimeZone {
 
     /// Returns the total offset from UTC, in seconds, that this time zone
     /// has at the given datetime.
@@ -179,8 +191,6 @@ impl<'a> FixedTimespanSet<'a> {
 
             assert!(timespans.current.offset != previous_zone.offset,
                     "Offsets cannot be equal! Is this a non-transition transition?");
-
-            println!("unix timestamp {:?}, previous time {:?}", unix_timestamp, previous_transition_time);
 
             // Test whether this timestamp is in the *overlap* after the
             // current timespan starts but before the previous one ends.
@@ -322,7 +332,6 @@ impl<'a> LocalTimes<'a> {
 }
 
 
-#[derive(Debug)]
 pub struct DateTime<'a> {
     adjusted: local::DateTime,
     current_offset: i64,
@@ -332,6 +341,15 @@ pub struct DateTime<'a> {
 impl<'a> DateTime<'a> {
     pub fn to_instant(&self) -> Instant {
         (self.adjusted - Duration::of(self.current_offset)).to_instant()
+    }
+}
+
+impl<'a> fmt::Debug for DateTime<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "zone::DateTime({}{}, {:?})",
+            self.adjusted.iso(),
+            Offset::of_seconds(self.current_offset as i32).unwrap().iso(),
+            self.time_zone.zone_name().unwrap_or("(unnamed time zone)"))
     }
 }
 

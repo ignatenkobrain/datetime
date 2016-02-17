@@ -97,3 +97,41 @@ fn offset_date_time() {
     let debugged = debug(offset.transform_date(then));
     assert_eq!(debugged, "offset::DateTime(2009-02-13T23:31:30.000+00:25:21)");
 }
+
+#[test]
+fn zoned_date_time() {
+    let then = local::DateTime::new(
+                local::Date::ymd(2009, Month::February, 13).unwrap(),
+                local::Time::hms(23, 31, 30).unwrap());
+
+    let debugged = debug(TEST_ZONE.convert_local(then).unwrap_precise());
+    assert_eq!(debugged, "zone::DateTime(2009-02-13T23:31:30.000+01, \"Test/Zone\")");
+}
+
+
+use datetime::zone::*;
+use std::borrow::Cow;
+
+/// Test constant time zone.
+///
+/// Stolen from `zone.rs`!
+/// If found, please return to owner.
+const ONE: FixedTimespanSet<'static> = FixedTimespanSet {
+    first: FixedTimespan {
+        offset: 0,
+        is_dst: false,
+        name: Cow::Borrowed("ZONE_A"),
+    },
+    rest: &[
+        (1174784400, FixedTimespan {
+            offset: 3600,
+            is_dst: false,
+            name: Cow::Borrowed("ZONE_B"),
+        }),
+    ],
+};
+
+const TEST_ZONE: TimeZone = TimeZone(Source::Static(&StaticTimeZone {
+    name: "Test/Zone",
+    fixed_timespans: ONE,
+}));
