@@ -215,9 +215,6 @@ impl<'a> FixedTimespanSet<'a> {
             assert!(timespans.current.offset != next_zone.offset,
                 "Offsets cannot be equal! Is this a non-transition transition?");
 
-            println!("unix timestamp {:?}, next time {:?}", unix_timestamp, next_transition_time);
-            println!("offset 1 {:?}, offset 2 {:?}", next_zone.offset, timespans.current.offset);
-
             // Test whether this timestamp is in the *overlap* after the
             // next timespan starts but before the current one ends.
             if timespans.current.offset > next_zone.offset
