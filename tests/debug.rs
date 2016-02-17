@@ -44,25 +44,25 @@ fn year() {
 #[test]
 fn recently() {
     let date = local::Date::ymd(1600, Month::February, 28).unwrap();
-    assert_eq!(debug(date), "Date(1600-02-28)");
+    assert_eq!(debug(date), "local::Date(1600-02-28)");
 }
 
 #[test]
 fn just_then() {
     let date = local::Date::ymd(-753, Month::December, 1).unwrap();
-    assert_eq!(debug(date), "Date(-0753-12-01)");
+    assert_eq!(debug(date), "local::Date(-0753-12-01)");
 }
 
 #[test]
 fn far_far_future() {
     let date = local::Date::ymd(10601, Month::January, 31).unwrap();
-    assert_eq!(debug(date), "Date(+10601-01-31)");
+    assert_eq!(debug(date), "local::Date(+10601-01-31)");
 }
 
 #[test]
 fn midday() {
     let time = local::Time::hms(12, 0, 0).unwrap();
-    assert_eq!(debug(time), "Time(12:00:00.000)");
+    assert_eq!(debug(time), "local::Time(12:00:00.000)");
 }
 
 #[test]
@@ -71,19 +71,19 @@ fn ascending() {
                 local::Date::ymd(2009, Month::February, 13).unwrap(),
                 local::Time::hms(23, 31, 30).unwrap());
 
-    assert_eq!(debug(then), "DateTime(2009-02-13T23:31:30.000)");
+    assert_eq!(debug(then), "local::DateTime(2009-02-13T23:31:30.000)");
 }
 
 #[test]
 fn zulu() {
     let offset = offset::Offset::utc();
-    assert_eq!(debug(offset), "Offset(Z)");
+    assert_eq!(debug(offset), "offset::Offset(Z)");
 }
 
 #[test]
 fn offset() {
     let offset = offset::Offset::of_seconds(-25 * 60 - 21).unwrap();
-    assert_eq!(debug(offset), "Offset(-00:25:21)");
+    assert_eq!(debug(offset), "offset::Offset(-00:25:21)");
 }
 
 #[test]

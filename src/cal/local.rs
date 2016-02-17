@@ -416,7 +416,7 @@ impl DatePiece for Date {
 
 impl fmt::Debug for Date {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Date({})", self.iso())
+        write!(f, "local::Date({})", self.iso())
     }
 }
 
@@ -526,7 +526,7 @@ impl TimePiece for Time {
 
 impl fmt::Debug for Time {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Time({})", self.iso())
+        write!(f, "local::Time({})", self.iso())
     }
 }
 
@@ -614,7 +614,7 @@ impl TimePiece for DateTime {
 
 impl fmt::Debug for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "DateTime({})", self.iso())
+        write!(f, "local::DateTime({})", self.iso())
     }
 }
 

@@ -94,7 +94,7 @@ impl Offset {
 
 impl fmt::Debug for Offset {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Offset({})", self.iso())
+        write!(f, "offset::Offset({})", self.iso())
     }
 }
 
