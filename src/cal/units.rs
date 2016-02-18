@@ -136,16 +136,93 @@ impl AsMut<i64> for Year {
 
 /// A month of the year, starting with January, and ending with December.
 ///
-/// This is stored as an enum instead of just a number to prevent
-/// off-by-one errors: is month 2 February (1-indexed) or March (0-indexed)?
-/// In this case, it’s 1-indexed, to have January become 1 when you use
-/// `as i32` in code.
+/// ### Month numbering
+///
+/// A month is represented by an enum instead of just a number. There have
+/// been *no end* of bugs caused by off-by-one-month errors in software: is
+/// month #2 February (1-indexed) or March (0-indexed)?
+///
+/// You can cast a month into a number type to convert it, and the resulting
+/// number will be 1-indexed (with January as month #1). However, the methods
+/// `from_one` and `months_from_january` do a better job of describing which
+/// index type is being used.
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Clone, Copy)]
 pub enum Month {
-    January =  1, February =  2, March     =  3,
-    April   =  4, May      =  5, June      =  6,
-    July    =  7, August   =  8, September =  9,
-    October = 10, November = 11, December  = 12,
+
+    /// **January**, the first month.
+    ///
+    /// Its Latin name *Ianuarius* comes from *Janus*, the Roman god of
+    /// beginnings and endings.
+    January = 1,
+
+    /// **February**, the second month.
+    ///
+    /// Its Latin name *Februarius* comes from *Februa*, a purification ritual
+    /// held during the month.
+    February = 2,
+
+    // insert Intercalaris here
+
+    /// **March**, the third month.
+    ///
+    /// Its Latin name *Martius* comes from *Mars*, the Roman god of war.
+    /// Early Roman calendars actually had this as the first month, as winter
+    /// was originally monthless.
+    March = 3,
+
+    /// **April**, the fourth month.
+    ///
+    /// Its Latin name *Aprilis* may come from the verb *aperire* meaning “to
+    /// open”, an allusion to when trees flower and buds open. (But this
+    /// derivation is not certain.)
+    April = 4,
+
+    /// **May**, the fifth month.
+    ///
+    /// Its Latin name *Maius* may come from the Greek god *Maia*.
+    May = 5,
+
+    /// **June**, the sixth month.
+    ///
+    /// Its Latin name *Junius* comes from the Roman goddess *Juno*,
+    June = 6,
+
+    /// **July**, the seventh month.
+    ///
+    /// Its Latin name *Julius* comes directly from *Julius Caesar* because he
+    /// was born in it. Before that, it was named *Quintilis* which literally
+    /// means “fifth”.
+    July = 7,
+
+    /// **August**, the eighth month.
+    ///
+    /// Its Latin name comes directly from the general *Augustus*. Before
+    /// that, it was named *Sextilis* which literally means “sixth”, and if
+    /// you thought these etymologies were getting boring, then don’t read the
+    /// next five.
+    August = 8,
+
+    /// **September**, the ninth month.
+    ///
+    /// Its name comes from the Latin *septem* meaning “seven”, even though
+    /// it’s the ninth month: January and February weren’t originally at the
+    /// start of the year, so the old numbering scheme used to fit.
+    September = 9,
+
+    /// **October**, the tenth month.
+    ///
+    /// Its name comes from the Latin *octo* meaning “eight”.
+    October = 10,
+
+    /// **November**, the eleventh month.
+    ///
+    /// Its name comes from the Latin *novem* meaning “nine”.
+    November = 11,
+
+    /// **December**, the twelfth and final month.
+    ///
+    /// Its name comes from the Latin *decem* meaning “ten”.
+    December = 12,
 }
 
 impl Month {
@@ -222,32 +299,65 @@ impl Month {
 
 
 /// A named day of the week.
-///
-/// Sunday is Day 0. This seems to be a North American thing? It’s pretty
-/// much an arbitrary choice, and as you can’t use the from_zero method,
-/// it won’t affect you at all. If you want to change it, the only thing
-/// that should be affected is local::Date::days_to_weekday.
 #[derive(PartialEq, Eq, Debug, Clone, Copy)]
 pub enum Weekday {
-    Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday,
+
+    /// **Monday**, the first day of the week.
+    ///
+    /// The name comes from the Anglo-Saxon *monandaeg*, meaning “moon’s day”.
+    Monday,
+
+    /// **Tuesday**, the second day of the week.
+    ///
+    /// Named after the Norse god *Tyr*.
+    Tuesday,
+
+    /// **Wednesday**, the third day of the week.
+    ///
+    /// Named after the Norse god *Odin*.
+    Wednesday,
+
+    /// **Thursday**, the fourth day of the week.
+    ///
+    /// Named after the Norse god *Thor*.
+    Thursday,
+
+    /// **Friday**, the fifth day of the week.
+    ///
+    /// Named after the Norse goddess *Frigg*.
+    Friday,
+
+    /// **Saturday**, the sixth day of the week.
+    ///
+    /// The name comes from the Latin *dies Saturni*, meaning “Saturn’s day”.
+    Saturday,
+
+    /// **Sunday**, the seventh and last day of the week.
+    ///
+    /// The name comes from the Latin *dies solis*, meaning “sun’s day”.
+    Sunday,
 }
 
-// I’m not going to give weekdays an Ord instance because there’s no
-// real standard as to whether Sunday should come before Monday, or the
-// other way around. Luckily, they don’t need one, as the field is
-// ignored when comparing local::Dates.
-
 impl Weekday {
+
+    /// Returns the number of days this weekday is from Monday, with Monday as
+    /// 1 day, Tuesday as 2 days, and so on until Sunday as 7 days.
+    ///
+    /// ```rust
+    /// use datetime::Weekday;
+    /// assert_eq!(Weekday::Saturday.days_from_monday_as_one(), 6);
+    /// assert_eq!(Weekday::Sunday.days_from_monday_as_one(), 7);
+    /// ```
     pub fn days_from_monday_as_one(&self) -> i8 {
         match *self {
-            Sunday => 7,   Monday => 1,
-            Tuesday => 2,  Wednesday => 3,
-            Thursday => 4, Friday => 5,
+            Sunday   => 7,  Monday => 1,
+            Tuesday  => 2,  Wednesday => 3,
+            Thursday => 4,  Friday => 5,
             Saturday => 6,
         }
     }
 
-    /// Return the weekday based on a number, with Sunday as Day 0, Monday as
+    /// Returns the weekday based on a number, with Sunday as Day 0, Monday as
     /// Day 1, and so on.
     ///
     /// ```rust
@@ -264,6 +374,14 @@ impl Weekday {
         })
     }
 
+    /// Returns the weekday based on a number, with Monday as Day 1, and Sunday
+    /// as Day 7.
+    ///
+    /// ```rust
+    /// use datetime::Weekday;
+    /// assert_eq!(Weekday::from_one(4), Ok(Weekday::Thursday));
+    /// assert!(Weekday::from_one(0).is_err());
+    /// ```
     pub fn from_one(weekday: i8) -> range_check::Result<Weekday, i8> {
         Ok(match weekday {   1 => Monday,    2 => Tuesday,
             3 => Wednesday,  4 => Thursday,  5 => Friday,
