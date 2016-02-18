@@ -4,11 +4,11 @@ use std::fmt;
 
 use range_check::{self, Check};
 
+use basic::Duration;
 use cal::{DatePiece, TimePiece};
 use cal::local;
 use cal::fmt::ISO;
 use cal::unit::{Year, Month, Weekday};
-use duration::Duration;
 
 
 #[derive(PartialEq, Copy, Clone)]

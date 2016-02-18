@@ -6,13 +6,12 @@ use std::ops::{Add, Sub};
 
 use range_check::{self, Check};
 
+use basic::{Instant, Duration};
 use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
 use cal::unit::{Year, Month, Weekday};
 use cal::unit::Month::*;
 use cal::compound::{YearMonthDay};
-use duration::Duration;
-use instant::Instant;
 use system::sys_time;
 use util::split_cycles;
 

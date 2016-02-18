@@ -1,6 +1,6 @@
 extern crate datetime;
 use datetime::cal::local;
-use datetime::duration::Duration;
+use datetime::Duration;
 
 
 #[test]

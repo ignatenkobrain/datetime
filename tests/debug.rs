@@ -20,7 +20,7 @@
 //! than the derived one.
 
 extern crate datetime;
-use datetime::instant::Instant;
+use datetime::Instant;
 use datetime::cal::local;
 use datetime::cal::unit::{Year, Month};
 use datetime::cal::offset::Offset;

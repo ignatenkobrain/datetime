@@ -20,8 +20,9 @@ extern crate range_check;
 #[macro_use]
 extern crate quick_error;
 
+mod basic;
+pub use basic::{Instant, Duration};
+
 pub mod cal;
-pub mod duration;
-pub mod instant;
 pub mod system;
 mod util;

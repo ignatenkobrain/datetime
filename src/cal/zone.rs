@@ -6,13 +6,12 @@ use std::sync::Arc;
 
 use range_check::Within;
 
+use basic::{Instant, Duration};
 use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
 use cal::local;
 use cal::offset::Offset;
 use cal::unit::{Year, Month, Weekday};
-use duration::Duration;
-use instant::Instant;
 
 
 /// A **time zone**, which here is a list of timespans, each containing a
