@@ -1,3 +1,12 @@
+//! Iteration over multiple consecutive days (or other timespans).
+//!
+//! A common problem is to want to iterate across time one chunk at a time.
+//! Examples of doing this include:
+//!
+//! - Iterating over each day in a year
+//! - Iterating over every hour in a day
+//! - Iterating over month in a range of years
+
 use std::fmt;
 use std::ops::{Range, RangeFrom, RangeTo, RangeFull};
 use std::slice::Iter as SliceIter;
@@ -8,6 +17,8 @@ use cal::units::{Month, Year};
 use cal::units::Month::*;
 
 
+/// Trait for types that contain multiple year-month spans. The obvious
+/// example is a year, which contains twelve of these.
 pub trait MonthsIter {
 
     /// Returns an iterator over a continuous span of months in this year,
@@ -96,8 +107,8 @@ impl MonthSpan for Range<Month> {
 ///
 /// Use the `months` method on `Year` to create instances of this iterator.
 pub struct YearMonths {
-    pub year: Year,
-    pub iter: SliceIter<'static, Month>,
+    year: Year,
+    iter: SliceIter<'static, Month>,
 }
 
 impl Iterator for YearMonths {
@@ -126,7 +137,7 @@ impl fmt::Debug for YearMonths {
     }
 }
 
-
+/// Trait for types that contain multiple dates.
 pub trait DaysIter {
 
     /// Returns an iterator over a continuous span of days in this month,
@@ -194,8 +205,8 @@ impl DaySpan for Range<i8> {
 /// Use the `days` method on `YearMonth` to create instances of this iterator.
 #[derive(PartialEq, Debug)]
 pub struct MonthDays {
-    pub ym: YearMonth,
-    pub range: Range<i8>,
+    ym: YearMonth,
+    range: Range<i8>,
 }
 
 impl Iterator for MonthDays {
