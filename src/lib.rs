@@ -31,7 +31,6 @@ pub use cal::fmt::ISO;  // TODO: replace this with just a 'fmt' import
 pub use cal::offset;
 pub use cal::zone;
 pub use cal::iter;
-pub use cal::convenience;
 
 mod duration;
 pub use duration::Duration;

@@ -402,6 +402,11 @@ impl Date {
         }
     }
 
+    /// Creates a new datestamp set to the current computer clock's date.
+    pub fn today() -> Date {
+        DateTime::now().date
+    }
+
     // I’m not 100% convinced on using `unsafe` for something that doesn’t
     // technically *need* to be unsafe, but I’ll stick with it for now.
 }
@@ -510,6 +515,11 @@ impl Time {
             second:      try!(second.check_range(0..60)),
             millisecond: try!(millisecond.check_range(0..1000)),
         })
+    }
+
+    /// Creates a new timestamp set to the current computer clock’s time.
+    pub fn now() -> Time {
+        DateTime::now().time
     }
 
     /// Calculate the number of seconds since midnight this time is at,

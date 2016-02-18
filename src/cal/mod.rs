@@ -6,7 +6,6 @@ pub mod fmt;
 pub mod offset;
 pub mod parse;
 pub mod zone;
-pub mod convenience;
 
 pub mod units;
 pub mod compounds;
