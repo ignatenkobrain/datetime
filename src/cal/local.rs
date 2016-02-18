@@ -698,6 +698,12 @@ impl ErrorTrait for Error {
     fn description(&self) -> &str {
         "datetime field out of range"
     }
+
+    fn cause(&self) -> Option<&ErrorTrait> {
+        match *self {
+            Error::OutOfRange(ref e) => Some(e),
+        }
+    }
 }
 
 impl<E> From<range_check::Error<E>> for Error

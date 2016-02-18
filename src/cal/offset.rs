@@ -114,11 +114,10 @@ impl ErrorTrait for Error {
     }
 
     fn cause(&self) -> Option<&ErrorTrait> {
-        if let Error::Date(ref e) = *self {
-            Some(e)
-        }
-        else {
-            None
+        match *self {
+            Error::Date(ref e)        => Some(e),
+            Error::OutOfRange(ref e)  => Some(e),
+            Error::SignMismatch       => None,
         }
     }
 }
