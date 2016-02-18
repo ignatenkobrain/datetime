@@ -41,6 +41,18 @@ impl YearMonth {
     }
 }
 
+
+/// A **month and day**, representing a certain day of the year.
+///
+/// A common example is using a month and a day to store someone’s *birthday*
+/// without storing their age.
+#[derive(PartialEq, Debug, Copy, Clone)]
+pub struct MonthDay {
+    pub month: Month,
+    pub day: Day,
+}
+
+
 #[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
 pub struct YearMonthDay {
     pub year: Year,
