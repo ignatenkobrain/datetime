@@ -101,6 +101,7 @@ quick_error! {
             description("sign mismatch")
         }
         Date(err: local::Error) {
+            from()
             cause(err)
         }
     }

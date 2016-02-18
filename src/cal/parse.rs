@@ -11,35 +11,29 @@ impl FromStr for local::Date {
     type Err = DateError;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        match iso8601::date(input) {
-            Ok(fields)  => fields_to_date(fields).map_err(DateError::Construct),
-            Err(e)      => Err(DateError::Parse(e)),
-        }
+        let fields = try!(iso8601::date(input));
+        let date = try!(fields_to_date(fields));
+        Ok(date)
     }
 }
 
 impl FromStr for local::Time {
     type Err = DateError;
 
-    fn from_str(input: &str) -> Result<local::Time, Self::Err> {
-        match iso8601::time(input) {
-            Ok(fields)  => fields_to_time(fields).map_err(DateError::Construct),
-            Err(e)      => Err(DateError::Parse(e)),
-        }
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        let fields = try!(iso8601::time(input));
+        let time = try!(fields_to_time(fields));
+        Ok(time)
     }
 }
 
 impl FromStr for local::DateTime {
     type Err = DateError;
 
-    fn from_str(input: &str) -> Result<local::DateTime, Self::Err> {
-        let fields = match iso8601::datetime(input) {
-            Ok(fields)  => fields,
-            Err(e)      => return Err(DateError::Parse(e)),
-        };
-
-        let date = try!(fields_to_date(fields.date).map_err(DateError::Construct));
-        let time = try!(fields_to_time(fields.time).map_err(DateError::Construct));
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        let fields = try!(iso8601::datetime(input));
+        let date = try!(fields_to_date(fields.date));
+        let time = try!(fields_to_time(fields.time));
         Ok(local::DateTime::new(date, time))
     }
 }
@@ -47,15 +41,16 @@ impl FromStr for local::DateTime {
 impl FromStr for offset::DateTime {
     type Err = OffsetError;
 
-    fn from_str(input: &str) -> Result<offset::DateTime, Self::Err> {
-        let fields = match iso8601::datetime(input) {
-            Ok(fields)  => fields,
-            Err(e)      => return Err(OffsetError::Parse(e)),
-        };
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        let fields = try!(iso8601::datetime(input));
 
-        let date   = try!(fields_to_date(fields.date).map_err(|e| OffsetError::Construct(offset::Error::Date(e))));
-        let time   = try!(fields_to_time(fields.time).map_err(|e| OffsetError::Construct(offset::Error::Date(e))));
-        let offset = try!(offset::Offset::of_hours_and_minutes(fields.time.tz_offset_hours as i8, fields.time.tz_offset_minutes as i8).map_err(OffsetError::Construct));
+        let date   = try!(fields_to_date(fields.date));
+        let time   = try!(fields_to_time(fields.time));
+
+        let hours   = fields.time.tz_offset_hours as i8;
+        let minutes = fields.time.tz_offset_minutes as i8;
+
+        let offset = try!(offset::Offset::of_hours_and_minutes(hours, minutes));
         Ok(offset.transform_date(local::DateTime::new(date, time)))
     }
 }
@@ -93,10 +88,12 @@ quick_error! {
     #[derive(PartialEq, Debug, Clone)]
     pub enum DateError {
         Construct(err: local::Error) {
+            from()
             description("parsing resulted in an invalid date")
             cause(err)
         }
         Parse(desc: String) {
+            from()
             description("parse error")
             display("Parse error: {}", desc)
         }
@@ -107,10 +104,13 @@ quick_error! {
     #[derive(PartialEq, Debug, Clone)]
     pub enum OffsetError {
         Construct(err: offset::Error) {
+            from()
+            from(e: local::Error) -> (e.into())
             description("parsing resulted in an invalid offset date")
             cause(err)
         }
         Parse(desc: String) {
+            from()
             description("parse error")
             display("Parse error: {}", desc)
         }
