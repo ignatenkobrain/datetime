@@ -108,12 +108,6 @@ mod days {
         let results: Vec<_> = (10..20).map(|d| Date::ymd(2008, March, d).unwrap()).collect();
         assert_eq!(days, results);
     }
-
-    #[test]
-    fn just_for_one_day() {
-        let day = Year::from(1066).month(October).day(14);
-        assert_eq!(day, Date::ymd(1066, October, 14));
-    }
 }
 
 #[test]

@@ -1,4 +1,3 @@
-use cal::local;
 use cal::units::{Year, Month};
 
 
@@ -28,11 +27,17 @@ impl YearMonth {
         self.month.days_in_month(self.year.is_leap_year())
     }
 
-    /// Returns a `local::Date` based on the day of this month.
+    /// Returns a `YearMonthDay` based on this year and month, along with the
+    /// given day.
     ///
-    /// This is just a short-cut for the `local::Date::ymd` constructor.
-    pub fn day(&self, day: i8) -> local::Result<local::Date> {
-        local::Date::ymd(self.year, self.month, day)
+    /// This is just a short-cut for creating `YearMonthDay` values, and
+    /// doesn’t do anything special.
+    pub fn day(&self, day: i8) -> YearMonthDay {
+        YearMonthDay {
+            year: self.year,
+            month: self.month,
+            day: day,
+        }
     }
 }
 
