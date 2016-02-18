@@ -17,6 +17,9 @@ extern crate num;
 extern crate pad;
 extern crate range_check;
 
+#[macro_use]
+extern crate quick_error;
+
 
 mod cal;
 pub use cal::{DatePiece, TimePiece};

@@ -1,7 +1,6 @@
 //! Dates, times, datetimes, months, and weekdays.
 
 use std::cmp::{Ordering, PartialOrd};
-use std::error::Error as ErrorTrait;
 use std::fmt;
 use std::ops::{Add, Sub};
 
@@ -682,26 +681,13 @@ fn days_to_weekday(days: i64) -> Weekday {
 }
 
 
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum Error {
-    OutOfRange(range_check::Error<i64>),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
-    }
-}
-
-impl ErrorTrait for Error {
-    fn description(&self) -> &str {
-        "datetime field out of range"
-    }
-
-    fn cause(&self) -> Option<&ErrorTrait> {
-        match *self {
-            Error::OutOfRange(ref e) => Some(e),
+quick_error! {
+    #[derive(PartialEq, Debug, Clone)]
+    pub enum Error {
+        OutOfRange(err: range_check::Error<i64>) {
+            description("datetime field out of range")
+            display("Field out of range: {}", err)
+            cause(err)
         }
     }
 }

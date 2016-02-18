@@ -1,6 +1,5 @@
 //! Datetimes with a fixed UTC offset.
 
-use std::error::Error as ErrorTrait;
 use std::fmt;
 
 use range_check::{self, Check};
@@ -90,34 +89,19 @@ impl fmt::Debug for Offset {
     }
 }
 
-
-#[derive(PartialEq, Debug, Clone)]
-pub enum Error {
-    OutOfRange(range_check::Error<i64>),
-    SignMismatch,
-    Date(local::Error),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
-    }
-}
-
-impl ErrorTrait for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::OutOfRange(_) => "offset field out of range",
-            Error::SignMismatch  => "sign mismatch",
-            Error::Date(_)       => "datetime field out of range",
+quick_error! {
+    #[derive(PartialEq, Debug, Clone)]
+    pub enum Error {
+        OutOfRange(err: range_check::Error<i64>) {
+            description("offset field out of range")
+            display("Field out of range: {}", err)
+            cause(err)
         }
-    }
-
-    fn cause(&self) -> Option<&ErrorTrait> {
-        match *self {
-            Error::Date(ref e)        => Some(e),
-            Error::OutOfRange(ref e)  => Some(e),
-            Error::SignMismatch       => None,
+        SignMismatch {
+            description("sign mismatch")
+        }
+        Date(err: local::Error) {
+            cause(err)
         }
     }
 }
