@@ -110,13 +110,13 @@ impl From<i64> for Year {
 impl Deref for Year {
     type Target = i64;
 
-    fn deref<'a>(&'a self) -> &'a Self::Target {
+    fn deref(&self) -> &i64 {
         &self.0
     }
 }
 
 impl DerefMut for Year {
-    fn deref_mut<'a>(&'a mut self) -> &'a mut Self::Target {
+    fn deref_mut(&mut self) -> &mut i64 {
         &mut self.0
     }
 }

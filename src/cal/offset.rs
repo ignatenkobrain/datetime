@@ -49,7 +49,7 @@ impl Offset {
     pub fn transform_date(&self, local: local::DateTime) -> DateTime {
         DateTime {
             local: local,
-            offset: self.clone(),
+            offset: *self,
         }
     }
 
