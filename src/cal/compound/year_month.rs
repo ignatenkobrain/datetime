@@ -25,25 +25,26 @@ impl YearMonth {
     pub fn day_count(&self) -> i8 {
         self.month.days_in_month(self.year.is_leap_year())
     }
-
-    /// Returns a `YearMonthDay` based on this year and month, along with the
-    /// given day.
-    ///
-    /// This is just a short-cut for creating `YearMonthDay` values, and
-    /// doesn’t do anything special.
-    pub fn day(&self, day: i8) -> YearMonthDay {
-        YearMonthDay {
-            year: self.year,
-            month: self.month,
-            day: day,
-        }
-    }
 }
 
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Debug, Copy, Clone)]
-pub struct YearMonthDay {
-    pub year: Year,
-    pub month: Month,
-    pub day: i8,
+impl Year {
+
+    /// Returns a year-month, pairing this year with the given month.
+    ///
+    /// ### Examples
+    ///
+    /// ```
+    /// use datetime::cal::unit::{Year, Month};
+    ///
+    /// let expiry_date = Year::from(2017).month(Month::February);
+    /// assert_eq!(*expiry_date.year, 2017);
+    /// assert_eq!(expiry_date.month, Month::February);
+    /// ```
+    pub fn month(&self, month: Month) -> YearMonth {
+        YearMonth {
+            year: *self,
+            month: month,
+        }
+    }
 }
