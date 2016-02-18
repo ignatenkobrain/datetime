@@ -10,6 +10,8 @@ pub mod parse;
 pub mod unit;
 pub mod zone;
 
+mod arithmetic;
+
 
 /// The **date piece** trait is used for date and time values that have
 /// date components of years, months, and days.

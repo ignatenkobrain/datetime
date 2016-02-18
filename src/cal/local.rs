@@ -2,7 +2,6 @@
 
 use std::cmp::{Ordering, PartialOrd};
 use std::fmt;
-use std::ops::{Add, Sub};
 
 use range_check::{self, Check};
 
@@ -642,22 +641,6 @@ impl TimePiece for DateTime {
 impl fmt::Debug for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "local::DateTime({})", self.iso())
-    }
-}
-
-impl Add<Duration> for DateTime {
-    type Output = DateTime;
-
-    fn add(self, duration: Duration) -> DateTime {
-        DateTime::from_instant(self.to_instant() + duration)
-    }
-}
-
-impl Sub<Duration> for DateTime {
-    type Output = DateTime;
-
-    fn sub(self, duration: Duration) -> DateTime {
-        DateTime::from_instant(self.to_instant() - duration)
     }
 }
 
