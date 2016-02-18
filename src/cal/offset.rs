@@ -3,7 +3,7 @@
 use std::error::Error as ErrorTrait;
 use std::fmt;
 
-use range_check::Within;
+use range_check::{self, Check};
 
 use cal::{DatePiece, TimePiece};
 use cal::local;
@@ -30,12 +30,9 @@ impl Offset {
     }
 
     pub fn of_seconds(seconds: i32) -> Result<Offset> {
-        if seconds.is_within(-86400..86401) {
-            Ok(Offset { offset_seconds: Some(seconds) })
-        }
-        else {
-            Err(Error::OutOfRange)
-        }
+        Ok(Offset {
+            offset_seconds: Some(try!(seconds.check_range(-86400..86401))),
+        })
     }
 
     pub fn of_hours_and_minutes(hours: i8, minutes: i8) -> Result<Offset> {
@@ -43,15 +40,9 @@ impl Offset {
         || (hours.is_negative() && minutes.is_positive()) {
             Err(Error::SignMismatch)
         }
-        else if hours <= -24 || hours >= 24 {
-            Err(Error::OutOfRange)
-        }
-        else if minutes <= -60 || minutes >= 60 {
-            Err(Error::OutOfRange)
-        }
         else {
-            let hours = hours as i32;
-            let minutes = minutes as i32;
+            let hours   = try!(hours.check_range(-23..24)) as i32;
+            let minutes = try!(minutes.check_range(-59..60)) as i32;
             Offset::of_seconds(hours * (60 * 60) + minutes * 60)
         }
     }
@@ -99,9 +90,10 @@ impl fmt::Debug for Offset {
     }
 }
 
+
 #[derive(PartialEq, Debug, Clone)]
 pub enum Error {
-    OutOfRange,
+    OutOfRange(range_check::Error<i64>),
     SignMismatch,
     Date(local::Error),
 }
@@ -115,7 +107,7 @@ impl fmt::Display for Error {
 impl ErrorTrait for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::OutOfRange    => "offset field out of range",
+            Error::OutOfRange(_) => "offset field out of range",
             Error::SignMismatch  => "sign mismatch",
             Error::Date(_)       => "datetime field out of range",
         }
@@ -130,6 +122,14 @@ impl ErrorTrait for Error {
         }
     }
 }
+
+impl<E> From<range_check::Error<E>> for Error
+where i64: From<E> {
+    fn from(original: range_check::Error<E>) -> Error {
+        Error::OutOfRange(original.generify())
+    }
+}
+
 
 use std::result;
 pub type Result<T> = result::Result<T, Error>;
@@ -186,6 +186,7 @@ impl fmt::Debug for DateTime {
         write!(f, "offset::DateTime({})", self.iso())
     }
 }
+
 
 #[cfg(test)]
 mod test {
