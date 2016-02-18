@@ -12,3 +12,28 @@ pub use self::month_into_days::{DaysIter, DaySpan, MonthDays};
 
 mod year_into_months;
 pub use self::year_into_months::{MonthsIter, MonthSpan, YearMonths};
+
+
+#[cfg(test)]
+mod both_test {
+    use super::*;
+    use cal::unit::Year;
+
+    #[test]
+    fn entire_year() {
+        let count = Year::from(1999).months(..)
+                              .flat_map(|m| m.days(..))
+                              .count();
+
+        assert_eq!(count, 365);
+    }
+
+    #[test]
+    fn entire_leap_year() {
+        let count = Year::from(2000).months(..)
+                              .flat_map(|m| m.days(..))
+                              .count();
+
+        assert_eq!(count, 366);
+    }
+}

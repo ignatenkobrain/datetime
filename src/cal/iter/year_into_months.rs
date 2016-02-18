@@ -44,7 +44,6 @@ pub trait MonthsIter {
 }
 
 
-
 impl MonthsIter for Year {
     fn months<S: MonthSpan>(&self, span: S) -> YearMonths {
         YearMonths {
@@ -126,5 +125,88 @@ impl DoubleEndedIterator for YearMonths {
 impl fmt::Debug for YearMonths {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "YearMonths({}, {:?})", *self.year, self.iter.as_slice())
+    }
+}
+
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use cal::unit::Year;
+    use cal::compound::YearMonth;
+    use cal::unit::Month::*;
+
+    #[test]
+    fn range_full() {
+        let year = Year::from(2013);
+        let months: Vec<_> = year.months(..).collect();
+        assert_eq!(months, vec![
+            year.month(January),
+            year.month(February),
+            year.month(March),
+            year.month(April),
+            year.month(May),
+            year.month(June),
+            year.month(July),
+            year.month(August),
+            year.month(September),
+            year.month(October),
+            year.month(November),
+            year.month(December),
+        ]);
+    }
+
+    #[test]
+    fn range_from() {
+        let year = Year::from(2013);
+        let months: Vec<_> = year.months(July..).collect();
+        assert_eq!(months, vec![
+            year.month(July),
+            year.month(August),
+            year.month(September),
+            year.month(October),
+            year.month(November),
+            year.month(December),
+        ]);
+    }
+
+    #[test]
+    fn range_to() {
+        let year = Year::from(2013);
+        let months: Vec<_> = year.months(..July).collect();
+        assert_eq!(months, vec![
+            year.month(January),
+            year.month(February),
+            year.month(March),
+            year.month(April),
+            year.month(May),
+            year.month(June),
+        ]);
+    }
+
+    #[test]
+    fn range() {
+        let year = Year::from(2013);
+        let months: Vec<_> = year.months(April..July).collect();
+        assert_eq!(months, vec![
+            year.month(April),
+            year.month(May),
+            year.month(June),
+        ]);
+    }
+
+    #[test]
+    fn range_empty() {
+        let year = Year::from(2013);
+        let months: Vec<_> = year.months(August..August).collect();
+        assert!(months.is_empty());
+    }
+
+    #[test]
+    fn range_singular() {
+        let year = Year::from(2013);
+        let months = year.month(April);
+        assert_eq!(months, year.month(April));
     }
 }

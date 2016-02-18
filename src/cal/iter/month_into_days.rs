@@ -36,6 +36,7 @@ impl DaysIter for YearMonth {
     }
 }
 
+
 /// A span of days, which gets used to construct a `MonthDays` iterator.
 pub trait DaySpan {
 
@@ -88,5 +89,38 @@ impl Iterator for MonthDays {
 impl DoubleEndedIterator for MonthDays {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.range.next_back().and_then(|d| local::Date::ymd(self.ym.year, self.ym.month, d).ok())
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use cal::local::Date;
+    use cal::unit::Year;
+    use cal::unit::Month::*;
+
+    #[test]
+    fn range_full() {
+        let year = Year::from(2013).month(February);
+        let days: Vec<_> = year.days(..).collect();
+        let results: Vec<_> = (1..29).map(|d| Date::ymd(2013, February, d).unwrap()).collect();
+        assert_eq!(days, results);
+    }
+
+    #[test]
+    fn range_full_leap_year() {
+        let year = Year::from(2000).month(February);
+        let days: Vec<_> = year.days(..).collect();
+        let results: Vec<_> = (1..30).map(|d| Date::ymd(2000, February, d).unwrap()).collect();
+        assert_eq!(days, results);
+    }
+
+    #[test]
+    fn range() {
+        let year = Year::from(2008).month(March);
+        let days: Vec<_> = year.days(10..20).collect();
+        let results: Vec<_> = (10..20).map(|d| Date::ymd(2008, March, d).unwrap()).collect();
+        assert_eq!(days, results);
     }
 }
