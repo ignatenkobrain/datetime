@@ -7,9 +7,7 @@ use cal::unit::{Year, Month};
 use cal::unit::Month::*;
 
 
-/// Trait for types that contain multiple year-month spans. The obvious
-/// example is a year, which contains twelve of these.
-pub trait MonthsIter {
+impl Year {
 
     /// Returns an iterator over a continuous span of months in this year,
     /// returning year-month pairs.
@@ -30,7 +28,6 @@ pub trait MonthsIter {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::cal::iter::MonthsIter;
     /// use datetime::cal::unit::Month::{April, June};
     /// use datetime::cal::unit::Year;
     ///
@@ -40,18 +37,14 @@ pub trait MonthsIter {
     /// assert_eq!(year.months(April .. June).count(), 2);
     /// assert_eq!(year.months(.. June).count(), 5);
     /// ```
-    fn months<S: MonthSpan>(&self, span: S) -> YearMonths;
-}
-
-
-impl MonthsIter for Year {
-    fn months<S: MonthSpan>(&self, span: S) -> YearMonths {
+    pub fn months<S: MonthSpan>(&self, span: S) -> YearMonths {
         YearMonths {
             year: *self,
             iter: span.get_slice().iter(),
         }
     }
 }
+
 
 /// A span of months, which gets used to construct a `YearMonths` iterator.
 ///
@@ -132,9 +125,7 @@ impl fmt::Debug for YearMonths {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use cal::unit::Year;
-    use cal::compound::YearMonth;
     use cal::unit::Month::*;
 
     #[test]

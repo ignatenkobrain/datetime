@@ -8,15 +8,14 @@
 //! - Iterating over month in a range of years
 
 mod month_into_days;
-pub use self::month_into_days::{DaysIter, DaySpan, MonthDays};
+pub use self::month_into_days::{DaySpan, MonthDays};
 
 mod year_into_months;
-pub use self::year_into_months::{MonthsIter, MonthSpan, YearMonths};
+pub use self::year_into_months::{MonthSpan, YearMonths};
 
 
 #[cfg(test)]
 mod both_test {
-    use super::*;
     use cal::unit::Year;
 
     #[test]

@@ -4,8 +4,7 @@ use cal::compound::YearMonth;
 use cal::local;
 
 
-/// Trait for types that contain multiple dates.
-pub trait DaysIter {
+impl YearMonth {
 
     /// Returns an iterator over a continuous span of days in this month,
     /// returning `local::Date` values.
@@ -13,7 +12,6 @@ pub trait DaysIter {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::cal::iter::DaysIter;
     /// use datetime::cal::unit::Month::September;
     /// use datetime::cal::unit::Year;
     ///
@@ -23,12 +21,7 @@ pub trait DaysIter {
     /// assert_eq!(ym.days(10 .. 20).count(), 10);
     /// assert_eq!(ym.days(.. 20).count(), 19);
     /// ```
-    fn days<S: DaySpan>(&self, span: S) -> MonthDays;
-}
-
-
-impl DaysIter for YearMonth {
-    fn days<S: DaySpan>(&self, span: S) -> MonthDays {
+    pub fn days<S: DaySpan>(&self, span: S) -> MonthDays {
         MonthDays {
             ym: *self,
             range: span.get_range(self)
@@ -95,7 +88,6 @@ impl DoubleEndedIterator for MonthDays {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use cal::local::Date;
     use cal::unit::Year;
     use cal::unit::Month::*;
