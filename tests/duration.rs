@@ -1,5 +1,5 @@
 extern crate datetime;
-pub use datetime::Duration;
+pub use datetime::duration::Duration;
 
 
 mod addition {

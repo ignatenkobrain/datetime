@@ -1,10 +1,11 @@
 extern crate datetime;
-pub use datetime::{YearMonth, Year};
-pub use datetime::iter::{DaysIter, MonthsIter};
+pub use datetime::cal::compound::YearMonth;
+pub use datetime::cal::unit::Year;
+pub use datetime::cal::iter::{DaysIter, MonthsIter};
 
 mod months {
     use super::*;
-    use datetime::Month::*;
+    use datetime::cal::unit::Month::*;
 
     #[test]
     fn range_full() {
@@ -82,8 +83,8 @@ mod months {
 
 mod days {
     use super::*;
-    use datetime::local::Date;
-    use datetime::Month::*;
+    use datetime::cal::local::Date;
+    use datetime::cal::unit::Month::*;
 
     #[test]
     fn range_full() {

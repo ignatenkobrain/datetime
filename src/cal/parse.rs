@@ -4,7 +4,7 @@ use iso8601;
 
 use cal::local;
 use cal::offset;
-use cal::units::{Month, Weekday};
+use cal::unit::{Month, Weekday};
 
 
 impl FromStr for local::Date {

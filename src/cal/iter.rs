@@ -11,10 +11,10 @@ use std::fmt;
 use std::ops::{Range, RangeFrom, RangeTo, RangeFull};
 use std::slice::Iter as SliceIter;
 
-use cal::compounds::YearMonth;
+use cal::compound::YearMonth;
 use cal::local;
-use cal::units::{Month, Year};
-use cal::units::Month::*;
+use cal::unit::{Month, Year};
+use cal::unit::Month::*;
 
 
 /// Trait for types that contain multiple year-month spans. The obvious
@@ -40,9 +40,9 @@ pub trait MonthsIter {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::Year;
-    /// use datetime::Month::{April, June};
-    /// use datetime::iter::MonthsIter;
+    /// use datetime::cal::iter::MonthsIter;
+    /// use datetime::cal::unit::Month::{April, June};
+    /// use datetime::cal::unit::Year;
     ///
     /// let year = Year::from(1999);
     /// assert_eq!(year.months(..).count(), 12);
@@ -146,9 +146,9 @@ pub trait DaysIter {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::Year;
-    /// use datetime::Month::September;
-    /// use datetime::iter::DaysIter;
+    /// use datetime::cal::iter::DaysIter;
+    /// use datetime::cal::unit::Month::September;
+    /// use datetime::cal::unit::Year;
     ///
     /// let ym = Year::from(1999).month(September);
     /// assert_eq!(ym.days(..).count(), 30);

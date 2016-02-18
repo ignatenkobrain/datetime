@@ -7,7 +7,7 @@ use range_check::{self, Check};
 use cal::{DatePiece, TimePiece};
 use cal::local;
 use cal::fmt::ISO;
-use cal::units::{Year, Month, Weekday};
+use cal::unit::{Year, Month, Weekday};
 use duration::Duration;
 
 

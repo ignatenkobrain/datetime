@@ -20,7 +20,11 @@
 //! than the derived one.
 
 extern crate datetime;
-use datetime::*;
+use datetime::instant::Instant;
+use datetime::cal::local;
+use datetime::cal::unit::{Year, Month};
+use datetime::cal::offset::Offset;
+
 use std::fmt::Debug;
 
 
@@ -37,7 +41,7 @@ fn instant() {
 
 #[test]
 fn year() {
-    let year = datetime::Year::from(2016);
+    let year = Year::from(2016);
     assert_eq!(debug(year), "Year(2016)");
 }
 
@@ -76,19 +80,19 @@ fn ascending() {
 
 #[test]
 fn zulu() {
-    let offset = offset::Offset::utc();
+    let offset = Offset::utc();
     assert_eq!(debug(offset), "offset::Offset(Z)");
 }
 
 #[test]
 fn offset() {
-    let offset = offset::Offset::of_seconds(-25 * 60 - 21).unwrap();
+    let offset = Offset::of_seconds(-25 * 60 - 21).unwrap();
     assert_eq!(debug(offset), "offset::Offset(-00:25:21)");
 }
 
 #[test]
 fn offset_date_time() {
-    let offset = offset::Offset::of_seconds(25 * 60 + 21).unwrap();
+    let offset = Offset::of_seconds(25 * 60 + 21).unwrap();
 
     let then = local::DateTime::new(
                 local::Date::ymd(2009, Month::February, 13).unwrap(),
@@ -109,7 +113,7 @@ fn zoned_date_time() {
 }
 
 
-use datetime::zone::*;
+use datetime::cal::zone::*;
 use std::borrow::Cow;
 
 /// Test constant time zone.

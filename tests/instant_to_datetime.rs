@@ -1,6 +1,7 @@
 extern crate datetime;
-use datetime::{Year, Month, DatePiece, TimePiece};
-use datetime::local::DateTime;
+use datetime::cal::{DatePiece, TimePiece};
+use datetime::cal::unit::{Year, Month};
+use datetime::cal::local::DateTime;
 
 
 #[test]

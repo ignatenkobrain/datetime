@@ -1,18 +1,14 @@
 //! ISO-8601 date and time calculations, which use years, months, days,
 //! hours, minutes, and seconds.
 
-pub mod local;
+pub mod compound;
 pub mod fmt;
+pub mod iter;
+pub mod local;
 pub mod offset;
 pub mod parse;
+pub mod unit;
 pub mod zone;
-
-pub mod units;
-pub mod compounds;
-pub mod iter;
-
-pub use self::compounds::{YearMonth};
-pub use self::units::{Year, Weekday, Month};
 
 
 /// The **date piece** trait is used for date and time values that have
@@ -22,10 +18,10 @@ pub trait DatePiece {
     /// The year, in absolute terms.
     /// This is in human-readable format, so the year 2014 actually has a
     /// year value of 2014, rather than 14 or 114 or anything like that.
-    fn year(&self) -> Year;
+    fn year(&self) -> unit::Year;
 
     /// The month of the year.
-    fn month(&self) -> Month;
+    fn month(&self) -> unit::Month;
 
     /// The day of the month, from 1 to 31.
     fn day(&self) -> i8;
@@ -34,7 +30,7 @@ pub trait DatePiece {
     fn yearday(&self) -> i16;
 
     /// The day of the week.
-    fn weekday(&self) -> Weekday;
+    fn weekday(&self) -> unit::Weekday;
 
     /// The number of years into the century.
     /// This is the same as the last two digits of the year.

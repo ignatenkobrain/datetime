@@ -1,5 +1,5 @@
 extern crate datetime;
-use datetime::Year;
+use datetime::cal::unit::Year;
 
 
 #[test]

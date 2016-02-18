@@ -1,4 +1,4 @@
-use cal::units::{Year, Month};
+use cal::unit::{Year, Month};
 
 
 /// A month-year pair.
@@ -17,11 +17,10 @@ impl YearMonth {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::Year;
-    /// use datetime::Month::February;
+    /// use datetime::cal::unit::{Year, Month};
     ///
-    /// assert_eq!(Year::from(2000).month(February).day_count(), 29);
-    /// assert_eq!(Year::from(1900).month(February).day_count(), 28);
+    /// assert_eq!(Year::from(2000).month(Month::February).day_count(), 29);
+    /// assert_eq!(Year::from(1900).month(Month::February).day_count(), 28);
     /// ```
     pub fn day_count(&self) -> i8 {
         self.month.days_in_month(self.year.is_leap_year())
@@ -39,17 +38,6 @@ impl YearMonth {
             day: day,
         }
     }
-}
-
-
-/// A **month and day**, representing a certain day of the year.
-///
-/// A common example is using a month and a day to store someone’s *birthday*
-/// without storing their age.
-#[derive(PartialEq, Debug, Copy, Clone)]
-pub struct MonthDay {
-    pub month: Month,
-    pub day: Day,
 }
 
 

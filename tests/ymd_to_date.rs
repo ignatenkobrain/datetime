@@ -1,11 +1,12 @@
 extern crate datetime;
-use datetime::local::Date;
-use datetime::{Year, Month, DatePiece};
+use datetime::cal::DatePiece;
+use datetime::cal::local;
+use datetime::cal::unit::{Year, Month};
 
 
 #[test]
 fn the_distant_past() {
-    let date = Date::ymd(7, Month::April, 1).unwrap();
+    let date = local::Date::ymd(7, Month::April, 1).unwrap();
 
     assert_eq!(date.year(),  Year::from(7));
     assert_eq!(date.month(), Month::April);
@@ -15,7 +16,7 @@ fn the_distant_past() {
 
 #[test]
 fn the_distant_present() {
-    let date = Date::ymd(2015, Month::January, 16).unwrap();
+    let date = local::Date::ymd(2015, Month::January, 16).unwrap();
 
     assert_eq!(date.year(),  Year::from(2015));
     assert_eq!(date.month(), Month::January);
@@ -25,7 +26,7 @@ fn the_distant_present() {
 
 #[test]
 fn the_distant_future() {
-    let date = Date::ymd(1048576, Month::October, 13).unwrap();
+    let date = local::Date::ymd(1048576, Month::October, 13).unwrap();
 
     assert_eq!(date.year(), Year::from(1048576));
     assert_eq!(date.month(), Month::October);

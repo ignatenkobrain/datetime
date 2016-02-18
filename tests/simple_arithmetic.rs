@@ -1,5 +1,6 @@
 extern crate datetime;
-use datetime::{Instant, Duration};
+use datetime::instant::Instant;
+use datetime::duration::Duration;
 
 
 #[test]

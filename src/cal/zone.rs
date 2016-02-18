@@ -10,7 +10,7 @@ use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
 use cal::local;
 use cal::offset::Offset;
-use cal::units::{Year, Month, Weekday};
+use cal::unit::{Year, Month, Weekday};
 use duration::Duration;
 use instant::Instant;
 

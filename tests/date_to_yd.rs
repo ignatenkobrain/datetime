@@ -1,25 +1,26 @@
 extern crate datetime;
-use datetime::local::Date;
-use datetime::{Month, DatePiece};
+use datetime::cal::DatePiece;
+use datetime::cal::local;
+use datetime::cal::unit::Month;
 
 
 #[test]
 fn start_of_year_day() {
-    let date = Date::ymd(2015, Month::January, 1).unwrap();
+    let date = local::Date::ymd(2015, Month::January, 1).unwrap();
     assert_eq!(date.yearday(), 1);
 }
 
 
 #[test]
 fn end_of_year_day() {
-    let date = Date::ymd(2015, Month::December, 31).unwrap();
+    let date = local::Date::ymd(2015, Month::December, 31).unwrap();
     assert_eq!(date.yearday(), 365);
 }
 
 
 #[test]
 fn end_of_leap_year_day() {
-    let date = Date::ymd(2016, Month::December, 31).unwrap();
+    let date = local::Date::ymd(2016, Month::December, 31).unwrap();
     assert_eq!(date.yearday(), 366);
 }
 
@@ -27,16 +28,16 @@ fn end_of_leap_year_day() {
 #[test]
 fn yearday() {
     for year in 1..2058 {
-        assert_eq!( Date::ymd(year, Month::from_one(01).unwrap(), 31).unwrap().yearday() + 1,
-                    Date::ymd(year, Month::from_one(02).unwrap(), 01).unwrap().yearday());
-        assert_eq!( Date::ymd(year, Month::from_one(03).unwrap(), 31).unwrap().yearday() + 1,
-                    Date::ymd(year, Month::from_one(04).unwrap(), 01).unwrap().yearday());
-        assert_eq!( Date::ymd(year, Month::from_one(04).unwrap(), 30).unwrap().yearday() + 1,
-                    Date::ymd(year, Month::from_one(05).unwrap(), 01).unwrap().yearday());
-        assert!(    Date::ymd(year, Month::from_one(12).unwrap(), 31).unwrap().yearday() > 0);
+        assert_eq!( local::Date::ymd(year, Month::January, 31).unwrap().yearday() + 1,
+                    local::Date::ymd(year, Month::February, 01).unwrap().yearday());
+        assert_eq!( local::Date::ymd(year, Month::March, 31).unwrap().yearday() + 1,
+                    local::Date::ymd(year, Month::April, 01).unwrap().yearday());
+        assert_eq!( local::Date::ymd(year, Month::April, 30).unwrap().yearday() + 1,
+                    local::Date::ymd(year, Month::May, 01).unwrap().yearday());
+        assert!(    local::Date::ymd(year, Month::December, 31).unwrap().yearday() > 0);
     }
-    assert_eq!( Date::ymd(1600, Month::from_one(02).unwrap(), 29).unwrap().yearday() + 1, // leap year
-                Date::ymd(1600, Month::from_one(03).unwrap(), 01).unwrap().yearday());
-    assert_eq!( Date::ymd(1601, Month::from_one(02).unwrap(), 28).unwrap().yearday() + 1, // no leap year
-                Date::ymd(1601, Month::from_one(03).unwrap(), 01).unwrap().yearday());
+    assert_eq!( local::Date::ymd(1600, Month::February, 29).unwrap().yearday() + 1, // leap year
+                local::Date::ymd(1600, Month::March, 01).unwrap().yearday());
+    assert_eq!( local::Date::ymd(1601, Month::February, 28).unwrap().yearday() + 1, // no leap year
+                local::Date::ymd(1601, Month::March, 01).unwrap().yearday());
 }

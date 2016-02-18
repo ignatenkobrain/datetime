@@ -1,10 +1,10 @@
 extern crate datetime;
-use datetime::local::DateTime;
+use datetime::cal::local;
 
 
 #[test]
 fn test_1970() {
-    let date = DateTime::at(0);
+    let date = local::DateTime::at(0);
     let res = date.to_instant().seconds();
 
     assert_eq!(res, 0)
@@ -12,7 +12,7 @@ fn test_1970() {
 
 #[test]
 fn test_1971() {
-    let date = DateTime::at(86400);
+    let date = local::DateTime::at(86400);
     let res = date.to_instant().seconds();
 
     assert_eq!(res, 86400)
@@ -20,7 +20,7 @@ fn test_1971() {
 
 #[test]
 fn test_1972() {
-    let date = DateTime::at(86400 * 365 * 2);
+    let date = local::DateTime::at(86400 * 365 * 2);
     let res = date.to_instant().seconds();
 
     assert_eq!(0, 86400 * 365 * 2 - res)
@@ -28,7 +28,7 @@ fn test_1972() {
 
 #[test]
 fn test_1973() {
-    let date = DateTime::at(86400 * (365 * 3 + 1));
+    let date = local::DateTime::at(86400 * (365 * 3 + 1));
     let res = date.to_instant().seconds();
 
     assert_eq!(0, 86400 * (365 * 3 + 1) - res)
@@ -36,7 +36,7 @@ fn test_1973() {
 
 #[test]
 fn some_date() {
-    let date = DateTime::at(1234567890);
+    let date = local::DateTime::at(1234567890);
     let res = date.to_instant().seconds();
 
     assert_eq!(1234567890, res)
@@ -44,7 +44,7 @@ fn some_date() {
 
 #[test]
 fn far_far_future() {
-    let date = DateTime::at(54321234567890);
+    let date = local::DateTime::at(54321234567890);
     let res = date.to_instant().seconds();
 
     assert_eq!(54321234567890, res)
@@ -52,7 +52,7 @@ fn far_far_future() {
 
 #[test]
 fn the_distant_past() {
-    let date = DateTime::at(-54321234567890);
+    let date = local::DateTime::at(-54321234567890);
     let res = date.to_instant().seconds();
 
     assert_eq!(-54321234567890, res)

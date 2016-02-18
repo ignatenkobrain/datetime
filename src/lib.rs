@@ -3,7 +3,7 @@
 #![crate_type = "dylib"]
 
 #![warn(missing_copy_implementations)]
-#![warn(missing_debug_implementations)]
+//#![warn(missing_debug_implementations)]
 //#![warn(missing_docs)]
 
 #![warn(trivial_casts, trivial_numeric_casts)]
@@ -20,25 +20,8 @@ extern crate range_check;
 #[macro_use]
 extern crate quick_error;
 
-
-mod cal;
-pub use cal::{DatePiece, TimePiece};
-pub use cal::units::{Month, Weekday, Year};
-pub use cal::compounds::{YearMonth};
-pub use cal::local;
-pub use cal::fmt::custom as fmt;
-pub use cal::fmt::ISO;  // TODO: replace this with just a 'fmt' import
-pub use cal::offset;
-pub use cal::zone;
-pub use cal::iter;
-
-mod duration;
-pub use duration::Duration;
-
-mod instant;
-pub use instant::Instant;
-
-mod system;
-pub use system::sys_timezone;
-
+pub mod cal;
+pub mod duration;
+pub mod instant;
+pub mod system;
 mod util;

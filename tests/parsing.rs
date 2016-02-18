@@ -1,6 +1,6 @@
 extern crate datetime;
-use datetime::local::{Date, DateTime};
-use datetime::{Weekday, Month};
+use datetime::cal::local;
+use datetime::cal::unit::{Weekday, Month};
 
 extern crate regex;
 
@@ -35,9 +35,9 @@ fn open_test_file() -> String {
 
 #[test]
 fn iso_formats(){
-    assert_eq!(DateTime::from_str("2001-02-03T04:05:06+07:00").unwrap(), DateTime::from_str("20010203T040506+0700").unwrap());
-    assert_eq!(DateTime::from_str("2001-02-03T04:05:06+07:00").unwrap(), DateTime::from_str("2001-W05-6T04:05:06+07:00").unwrap());
-    assert_eq!(DateTime::from_str("20010203T040506+0700").unwrap(), DateTime::from_str("2001-W05-6T04:05:06+07:00").unwrap());
+    assert_eq!(local::DateTime::from_str("2001-02-03T04:05:06+07:00").unwrap(), local::DateTime::from_str("20010203T040506+0700").unwrap());
+    assert_eq!(local::DateTime::from_str("2001-02-03T04:05:06+07:00").unwrap(), local::DateTime::from_str("2001-W05-6T04:05:06+07:00").unwrap());
+    assert_eq!(local::DateTime::from_str("20010203T040506+0700").unwrap(),      local::DateTime::from_str("2001-W05-6T04:05:06+07:00").unwrap());
 }
 
 
@@ -59,12 +59,12 @@ fn date_fromweekday_vs_new_vs_parse() {
 
                 // instantiating 4 equivalent date in 5 different ways
                 println!("{:?}", ex0);
-                let date_fwd_s = Date::from_str(&ex0).unwrap();
+                let date_fwd_s = local::Date::from_str(&ex0).unwrap();
                 let wday =  Weekday::from_one(wday as i8).unwrap();
-                let date_fwd_t = Date::ywd(wyear, week, wday).unwrap();
-                let date_new_s = Date::from_str(&ex2).unwrap();
-                let date_new_t = Date::ymd(year, Month::from_one(month as i8).unwrap(), day as i8).unwrap();
-                let date_parse = Date::from_str(&ex0).unwrap();
+                let date_fwd_t = local::Date::ywd(wyear, week, wday).unwrap();
+                let date_new_s = local::Date::from_str(&ex2).unwrap();
+                let date_new_t = local::Date::ymd(year, Month::from_one(month as i8).unwrap(), day as i8).unwrap();
+                let date_parse = local::Date::from_str(&ex0).unwrap();
 
                 // 5 way comparison
                 assert_eq!(date_fwd_t, date_new_t);

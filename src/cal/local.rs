@@ -8,9 +8,9 @@ use range_check::{self, Check};
 
 use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
-use cal::units::{Year, Month, Weekday};
-use cal::units::Month::*;
-use cal::compounds::{YearMonthDay};
+use cal::unit::{Year, Month, Weekday};
+use cal::unit::Month::*;
+use cal::compound::{YearMonthDay};
 use duration::Duration;
 use instant::Instant;
 use system::sys_time;
@@ -121,16 +121,16 @@ impl Date {
     /// week-of-year, and weekday.
     ///
     /// ```rust
-    /// use datetime::local::Date;
-    /// use datetime::{Year, Month};
-    /// use datetime::DatePiece;
+    /// use datetime::cal::local;
+    /// use datetime::cal::unit::{Year, Month};
+    /// use datetime::cal::DatePiece;
     ///
-    /// let date = Date::ymd(1969, Month::July, 20).unwrap();
+    /// let date = local::Date::ymd(1969, Month::July, 20).unwrap();
     /// assert_eq!(date.year(), Year::from(1969));
     /// assert_eq!(date.month(), Month::July);
     /// assert_eq!(date.day(), 20);
     ///
-    /// assert!(Date::ymd(2100, Month::February, 29).is_err());
+    /// assert!(local::Date::ymd(2100, Month::February, 29).is_err());
     /// ```
     ///
     /// ### Overloading
@@ -139,11 +139,12 @@ impl Date {
     /// to dereference it to get the actual year number.
     ///
     /// ```
-    /// use datetime::{Year, Month, DatePiece};
-    /// use datetime::local::Date;
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::local;
+    /// use datetime::cal::unit::{Year, Month};
     ///
     /// let year = Year::from(1969);
-    /// let date = Date::ymd(year, Month::July, 20).unwrap();
+    /// let date = local::Date::ymd(year, Month::July, 20).unwrap();
     /// assert_eq!(date.year(), year);
     /// ```
     pub fn ymd<Y>(year: Y, month: Month, day: i8) -> Result<Date>
@@ -172,10 +173,11 @@ impl Date {
     /// and day-of-year.
     ///
     /// ```rust
-    /// use datetime::local::Date;
-    /// use datetime::{Year, Weekday, Month, DatePiece};
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::local;
+    /// use datetime::cal::unit::{Year, Weekday, Month};
     ///
-    /// let date = Date::yd(2015, 0x100).unwrap();
+    /// let date = local::Date::yd(2015, 0x100).unwrap();
     /// assert_eq!(date.year(), Year::from(2015));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 13);
@@ -187,11 +189,12 @@ impl Date {
     /// to dereference it to get the actual year number.
     ///
     /// ```
-    /// use datetime::{Year, Month, DatePiece};
-    /// use datetime::local::Date;
+    /// use datetime::cal::unit::{Year, Month};
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::local;
     ///
     /// let year = Year::from(2015);
-    /// let date = Date::yd(year, 0x100).unwrap();
+    /// let date = local::Date::yd(year, 0x100).unwrap();
     /// assert_eq!(date.year(), year);
     /// ```
 
@@ -219,10 +222,11 @@ impl Date {
     /// week-of-year, and weekday.
     ///
     /// ```rust
-    /// use datetime::local::Date;
-    /// use datetime::{Year, Weekday, Month, DatePiece};
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::local;
+    /// use datetime::cal::unit::{Year, Weekday, Month};
     ///
-    /// let date = Date::ywd(2015, 37, Weekday::Friday).unwrap();
+    /// let date = local::Date::ywd(2015, 37, Weekday::Friday).unwrap();
     /// assert_eq!(date.year(), Year::from(2015));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 11);
@@ -233,16 +237,17 @@ impl Date {
     /// when working with dates early in week 1, or late in week 53:
     ///
     /// ```rust
-    /// use datetime::local::Date;
-    /// use datetime::{Year, Weekday, Month, DatePiece};
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::local;
+    /// use datetime::cal::unit::{Year, Weekday, Month};
     ///
-    /// let date = Date::ywd(2009, 1, Weekday::Monday).unwrap();
+    /// let date = local::Date::ywd(2009, 1, Weekday::Monday).unwrap();
     /// assert_eq!(date.year(), Year::from(2008));
     /// assert_eq!(date.month(), Month::December);
     /// assert_eq!(date.day(), 29);
     /// assert_eq!(date.weekday(), Weekday::Monday);
     ///
-    /// let date = Date::ywd(2009, 53, Weekday::Sunday).unwrap();
+    /// let date = local::Date::ywd(2009, 53, Weekday::Sunday).unwrap();
     /// assert_eq!(date.year(), Year::from(2010));
     /// assert_eq!(date.month(), Month::January);
     /// assert_eq!(date.day(), 3);
@@ -283,10 +288,11 @@ impl Date {
     /// Instantiate the 25th of September 2015 given its day-of-year (268).
     ///
     /// ```rust
-    /// use datetime::local::Date;
-    /// use datetime::{Year, Month, DatePiece};
+    /// use datetime::cal::local;
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::unit::{Year, Month};
     ///
-    /// let date = Date::yd(2015, 268).unwrap();
+    /// let date = local::Date::yd(2015, 268).unwrap();
     /// assert_eq!(date.year(), Year::from(2015));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 25);
@@ -295,10 +301,11 @@ impl Date {
     /// Remember that on leap years, the number of days in a year changes:
     ///
     /// ```rust
-    /// use datetime::local::Date;
-    /// use datetime::{Year, Month, DatePiece};
+    /// use datetime::cal::local;
+    /// use datetime::cal::DatePiece;
+    /// use datetime::cal::unit::{Year, Month};
     ///
-    /// let date = Date::yd(2016, 268).unwrap();
+    /// let date = local::Date::yd(2016, 268).unwrap();
     /// assert_eq!(date.year(), Year::from(2016));
     /// assert_eq!(date.month(), Month::September);
     /// assert_eq!(date.day(), 24);  // not the 25th!
@@ -725,7 +732,7 @@ pub type Result<T> = result::Result<T, Error>;
 #[cfg(test)]
 mod test {
     use super::{Date, days_since_epoch};
-    use cal::units::Month;
+    use cal::unit::Month;
 
 
     #[test]

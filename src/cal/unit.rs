@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut};
 
 use range_check;
 
-use cal::compounds::YearMonth;
+use cal::compound::YearMonth;
 use util::split_cycles;
 
 use self::Month::*;
@@ -22,7 +22,7 @@ impl Year {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::Year;
+    /// use datetime::cal::unit::Year;
     ///
     /// assert_eq!(Year::from(1904).next_year(), Year::from(1905));
     /// ```
@@ -35,7 +35,7 @@ impl Year {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::Year;
+    /// use datetime::cal::unit::Year;
     ///
     /// assert_eq!(Year::from(1904).previous_year(), Year::from(1903));
     /// ```
@@ -48,7 +48,7 @@ impl Year {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::Year;
+    /// use datetime::cal::unit::Year;
     ///
     /// assert_eq!(Year::from(2000).is_leap_year(), true);
     /// assert_eq!(Year::from(1900).is_leap_year(), false);
@@ -62,7 +62,7 @@ impl Year {
     /// ### Examples
     ///
     /// ```
-    /// use datetime::{Year, Month};
+    /// use datetime::cal::unit::{Year, Month};
     ///
     /// let expiry_date = Year::from(2017).month(Month::February);
     /// assert_eq!(*expiry_date.year, 2017);
@@ -264,7 +264,8 @@ impl Month {
     /// February as **Month 2**, and so on.
     ///
     /// ```rust
-    /// use datetime::Month;
+    /// use datetime::cal::unit::Month;
+    ///
     /// assert_eq!(Month::from_one(5), Ok(Month::May));
     /// assert!(Month::from_one(0).is_err());
     /// ```
@@ -282,7 +283,8 @@ impl Month {
     /// February as **Month 1**, and so on.
     ///
     /// ```rust
-    /// use datetime::Month;
+    /// use datetime::cal::unit::Month;
+    ///
     /// assert_eq!(Month::from_zero(5), Ok(Month::June));
     /// assert!(Month::from_zero(12).is_err());
     /// ```
@@ -344,7 +346,8 @@ impl Weekday {
     /// 1 day, Tuesday as 2 days, and so on until Sunday as 7 days.
     ///
     /// ```rust
-    /// use datetime::Weekday;
+    /// use datetime::cal::unit::Weekday;
+    ///
     /// assert_eq!(Weekday::Saturday.days_from_monday_as_one(), 6);
     /// assert_eq!(Weekday::Sunday.days_from_monday_as_one(), 7);
     /// ```
@@ -361,7 +364,8 @@ impl Weekday {
     /// Day 1, and so on.
     ///
     /// ```rust
-    /// use datetime::Weekday;
+    /// use datetime::cal::unit::Weekday;
+    ///
     /// assert_eq!(Weekday::from_zero(4), Ok(Weekday::Thursday));
     /// assert!(Weekday::from_zero(7).is_err());
     /// ```
@@ -378,7 +382,8 @@ impl Weekday {
     /// as Day 7.
     ///
     /// ```rust
-    /// use datetime::Weekday;
+    /// use datetime::cal::unit::Weekday;
+    ///
     /// assert_eq!(Weekday::from_one(4), Ok(Weekday::Thursday));
     /// assert!(Weekday::from_one(0).is_err());
     /// ```
