@@ -10,11 +10,12 @@
 #![warn(unused_qualifications)]
 #![warn(unused_results)]
 
-extern crate locale;
+extern crate iso8601;
 extern crate libc;
+extern crate locale;
 extern crate num;
 extern crate pad;
-extern crate iso8601;
+extern crate range_check;
 
 
 mod cal;

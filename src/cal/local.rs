@@ -5,6 +5,8 @@ use std::error::Error as ErrorTrait;
 use std::fmt;
 use std::ops::{Add, Sub};
 
+use range_check::{self, Check};
+
 use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
 use cal::units::{Year, Month, Weekday};
@@ -13,7 +15,7 @@ use cal::compounds::{YearMonthDay};
 use duration::Duration;
 use instant::Instant;
 use system::sys_time;
-use util::{self, RangeExt, split_cycles};
+use util::split_cycles;
 
 
 /// Number of days guaranteed to be in four years.
@@ -147,9 +149,7 @@ impl Date {
     /// ```
     pub fn ymd<Y>(year: Y, month: Month, day: i8) -> Result<Date>
     where Y: Into<Year> {
-        let ymd = YearMonthDay { year: year.into(), month: month, day: day };
-        try!(ymd.check_ranges());
-
+        let ymd = try!(YearMonthDay { year: year.into(), month: month, day: day }.check_ranges());
         let days = days_since_epoch(ymd);
         Ok(Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
     }
@@ -194,7 +194,7 @@ impl Date {
         let year = year.into();
 
         let days_in_year = if year.is_leap_year() { 367 } else { 366 };
-        try!(yearday.check_range(0..days_in_year));
+        let yearday = try!(yearday.check_range(0..days_in_year));
 
         let jan_1 = YearMonthDay { year: year, month: January, day: 1 };
         let days = days_since_epoch(jan_1);
@@ -473,9 +473,12 @@ impl Time {
             return Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 });
         }
 
-        try!(hour.check_range(0..24));
-        try!(minute.check_range(0..60));
-        Ok(Time { hour: hour, minute: minute, second: 0, millisecond: 0 })
+        Ok(Time {
+            hour: try!(hour.check_range(0..24)),
+            minute: try!(minute.check_range(0..60)),
+            second: 0,
+            millisecond: 0,
+        })
     }
 
     /// Creates a new timestamp instance with the given hour, minute, and
@@ -488,10 +491,12 @@ impl Time {
             return Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 });
         }
 
-        try!(hour.check_range(0..24));
-        try!(minute.check_range(0..60));
-        try!(second.check_range(0..60));
-        Ok(Time { hour: hour, minute: minute, second: second, millisecond: 0 })
+        Ok(Time {
+            hour: try!(hour.check_range(0..24)),
+            minute: try!(minute.check_range(0..60)),
+            second: try!(second.check_range(0..60)),
+            millisecond: 0,
+        })
     }
 
     /// Creates a new timestamp instance with the given hour, minute,
@@ -500,12 +505,12 @@ impl Time {
     /// The values are checked for validity before instantiation, and
     /// passing in values out of range will return an `Err`.
     pub fn hms_ms(hour: i8, minute: i8, second: i8, millisecond: i16) -> Result<Time> {
-        try!(hour.check_range(0..24));
-        try!(minute.check_range(0..60));
-        try!(second.check_range(0..60));
-        try!(millisecond.check_range(0..1000));
-
-        Ok(Time { hour: hour, minute: minute, second: second, millisecond: millisecond })
+        Ok(Time {
+            hour:        try!(hour.check_range(0..24)),
+            minute:      try!(minute.check_range(0..60)),
+            second:      try!(second.check_range(0..60)),
+            millisecond: try!(millisecond.check_range(0..1000)),
+        })
     }
 
     /// Calculate the number of seconds since midnight this time is at,
@@ -678,9 +683,9 @@ fn days_to_weekday(days: i64) -> Weekday {
 
 
 
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Error {
-    OutOfRange,
+    OutOfRange(range_check::Error<i64>),
 }
 
 impl fmt::Display for Error {
@@ -695,9 +700,10 @@ impl ErrorTrait for Error {
     }
 }
 
-impl From<util::OutOfRange> for Error {
-    fn from(_original: util::OutOfRange) -> Error {
-        Error::OutOfRange
+impl<E> From<range_check::Error<E>> for Error
+where i64: From<E> {
+    fn from(original: range_check::Error<E>) -> Error {
+        Error::OutOfRange(original.generify())
     }
 }
 

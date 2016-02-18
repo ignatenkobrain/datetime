@@ -1,6 +1,8 @@
+use range_check::{self, Check};
+
 use cal::local;
 use cal::units::{Year, Month};
-use util::{self, RangeExt};
+
 
 /// A month-year pair.
 #[derive(PartialEq, Debug, Copy, Clone)]
@@ -44,8 +46,8 @@ pub struct YearMonthDay {
 }
 
 impl YearMonthDay {
-    pub fn check_ranges(&self) -> Result<(), util::OutOfRange> {
-        try!(self.day.check_range(1 .. self.month.days_in_month(self.year.is_leap_year()) + 1));
-        Ok(())
+    pub fn check_ranges(self) -> range_check::Result<Self, i8> {
+        let _ = try!(self.day.check_range(1 .. self.month.days_in_month(self.year.is_leap_year()) + 1));
+        Ok(self)
     }
 }

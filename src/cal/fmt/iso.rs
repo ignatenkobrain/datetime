@@ -1,8 +1,10 @@
 use std::fmt;
+
+use range_check::Within;
+
 use cal::{DatePiece, TimePiece};
 use cal::offset;
 use cal::local;
-use util::RangeExt;
 
 
 pub trait ISO: Sized {

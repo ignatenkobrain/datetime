@@ -3,12 +3,13 @@
 use std::error::Error as ErrorTrait;
 use std::fmt;
 
+use range_check::Within;
+
 use cal::{DatePiece, TimePiece};
 use cal::local;
 use cal::fmt::ISO;
 use cal::units::{Year, Month, Weekday};
 use duration::Duration;
-use util::RangeExt;
 
 
 #[derive(PartialEq, Copy, Clone)]
@@ -98,7 +99,7 @@ impl fmt::Debug for Offset {
     }
 }
 
-#[derive(PartialEq, Debug, Copy, Clone)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Error {
     OutOfRange,
     SignMismatch,
