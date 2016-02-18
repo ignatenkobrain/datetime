@@ -148,8 +148,15 @@ impl Date {
     /// ```
     pub fn ymd<Y>(year: Y, month: Month, day: i8) -> Result<Date>
     where Y: Into<Year> {
-        let ymd = try!(YearMonthDay { year: year.into(), month: month, day: day }.check_ranges());
+
+        // ‘day’ is the only field that needs validating first, but 'year'
+        // needs to become a `Year` as well.
+        let year = year.into();
+        let day = try!(day.check_range(1 .. month.days_in_month(year.is_leap_year()) + 1));
+
+        let ymd  = YearMonthDay { year: year.into(), month: month, day: day };
         let days = days_since_epoch(ymd);
+
         Ok(Date::from_days_since_epoch(days - EPOCH_DIFFERENCE))
     }
 

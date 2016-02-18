@@ -1,5 +1,3 @@
-use range_check::{self, Check};
-
 use cal::local;
 use cal::units::{Year, Month};
 
@@ -43,11 +41,4 @@ pub struct YearMonthDay {
     pub year: Year,
     pub month: Month,
     pub day: i8,
-}
-
-impl YearMonthDay {
-    pub fn check_ranges(self) -> range_check::Result<Self, i8> {
-        let _ = try!(self.day.check_range(1 .. self.month.days_in_month(self.year.is_leap_year()) + 1));
-        Ok(self)
-    }
 }
