@@ -1,7 +1,9 @@
 use std::ops::{Deref, DerefMut};
 
-pub use cal::compounds::{YearMonth};
-pub use util::split_cycles;
+use range_check;
+
+use cal::compounds::YearMonth;
+use util::split_cycles;
 
 use self::Month::*;
 use self::Weekday::*;
@@ -186,16 +188,16 @@ impl Month {
     ///
     /// ```rust
     /// use datetime::Month;
-    /// assert_eq!(Month::from_one(5), Some(Month::May));
-    /// assert!(Month::from_one(0).is_none());
+    /// assert_eq!(Month::from_one(5), Ok(Month::May));
+    /// assert!(Month::from_one(0).is_err());
     /// ```
-    pub fn from_one(month: i8) -> Option<Month> {
-        Some(match month {
+    pub fn from_one(month: i8) -> range_check::Result<Month, i8> {
+        Ok(match month {
              1 => January,   2 => February,   3 => March,
              4 => April,     5 => May,        6 => June,
              7 => July,      8 => August,     9 => September,
             10 => October,  11 => November,  12 => December,
-             _ => return None,
+             n => return Err(range_check::Error::new(n, 1..13)),
         })
     }
 
@@ -204,16 +206,16 @@ impl Month {
     ///
     /// ```rust
     /// use datetime::Month;
-    /// assert_eq!(Month::from_zero(5), Some(Month::June));
-    /// assert!(Month::from_zero(12).is_none());
+    /// assert_eq!(Month::from_zero(5), Ok(Month::June));
+    /// assert!(Month::from_zero(12).is_err());
     /// ```
-    pub fn from_zero(month: i8) -> Option<Month> {
-        Some(match month {
+    pub fn from_zero(month: i8) -> range_check::Result<Month, i8> {
+        Ok(match month {
             0 => January,   1 => February,   2 => March,
             3 => April,     4 => May,        5 => June,
             6 => July,      7 => August,     8 => September,
             9 => October,  10 => November,  11 => December,
-            _ => return None,
+            n => return Err(range_check::Error::new(n, 0..12)),
         })
     }
 }
@@ -250,22 +252,23 @@ impl Weekday {
     ///
     /// ```rust
     /// use datetime::Weekday;
-    /// assert_eq!(Weekday::from_zero(4), Some(Weekday::Thursday));
-    /// assert!(Weekday::from_zero(7).is_none());
+    /// assert_eq!(Weekday::from_zero(4), Ok(Weekday::Thursday));
+    /// assert!(Weekday::from_zero(7).is_err());
     /// ```
-    pub fn from_zero(weekday: i8) -> Option<Weekday> {
-        Some(match weekday {
+    pub fn from_zero(weekday: i8) -> range_check::Result<Weekday, i8> {
+        Ok(match weekday {
             0 => Sunday,     1 => Monday,    2 => Tuesday,
             3 => Wednesday,  4 => Thursday,  5 => Friday,
-            6 => Saturday,   _ => return None,
+            6 => Saturday,
+            n => return Err(range_check::Error::new(n, 0..7)),
         })
     }
 
-    pub fn from_one(weekday: i8) -> Option<Weekday> {
-        Some(match weekday {
-            7 => Sunday,     1 => Monday,    2 => Tuesday,
+    pub fn from_one(weekday: i8) -> range_check::Result<Weekday, i8> {
+        Ok(match weekday {   1 => Monday,    2 => Tuesday,
             3 => Wednesday,  4 => Thursday,  5 => Friday,
-            6 => Saturday,   _ => return None,
+            6 => Saturday,   7 => Sunday,
+            n => return Err(range_check::Error::new(n, 1..8)),
         })
     }
 }

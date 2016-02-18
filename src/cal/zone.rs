@@ -4,6 +4,8 @@ use std::borrow::Cow;
 use std::fmt;
 use std::sync::Arc;
 
+use range_check::Within;
+
 use cal::{DatePiece, TimePiece};
 use cal::fmt::ISO;
 use cal::local;
@@ -11,7 +13,6 @@ use cal::offset::Offset;
 use cal::units::{Year, Month, Weekday};
 use duration::Duration;
 use instant::Instant;
-use util::RangeExt;
 
 
 /// A **time zone**, which here is a list of timespans, each containing a

@@ -1,14 +1,14 @@
 //! Datetimes with a fixed UTC offset.
 
-use std::error::Error as ErrorTrait;
 use std::fmt;
+
+use range_check::{self, Check};
 
 use cal::{DatePiece, TimePiece};
 use cal::local;
 use cal::fmt::ISO;
 use cal::units::{Year, Month, Weekday};
 use duration::Duration;
-use util::RangeExt;
 
 
 #[derive(PartialEq, Copy, Clone)]
@@ -29,12 +29,9 @@ impl Offset {
     }
 
     pub fn of_seconds(seconds: i32) -> Result<Offset> {
-        if seconds.is_within(-86400..86401) {
-            Ok(Offset { offset_seconds: Some(seconds) })
-        }
-        else {
-            Err(Error::OutOfRange)
-        }
+        Ok(Offset {
+            offset_seconds: Some(try!(seconds.check_range(-86400..86401))),
+        })
     }
 
     pub fn of_hours_and_minutes(hours: i8, minutes: i8) -> Result<Offset> {
@@ -42,15 +39,9 @@ impl Offset {
         || (hours.is_negative() && minutes.is_positive()) {
             Err(Error::SignMismatch)
         }
-        else if hours <= -24 || hours >= 24 {
-            Err(Error::OutOfRange)
-        }
-        else if minutes <= -60 || minutes >= 60 {
-            Err(Error::OutOfRange)
-        }
         else {
-            let hours = hours as i32;
-            let minutes = minutes as i32;
+            let hours   = try!(hours.check_range(-23..24)) as i32;
+            let minutes = try!(minutes.check_range(-59..60)) as i32;
             Offset::of_seconds(hours * (60 * 60) + minutes * 60)
         }
     }
@@ -98,37 +89,31 @@ impl fmt::Debug for Offset {
     }
 }
 
-#[derive(PartialEq, Debug, Copy, Clone)]
-pub enum Error {
-    OutOfRange,
-    SignMismatch,
-    Date(local::Error),
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
-    }
-}
-
-impl ErrorTrait for Error {
-    fn description(&self) -> &str {
-        match *self {
-            Error::OutOfRange    => "offset field out of range",
-            Error::SignMismatch  => "sign mismatch",
-            Error::Date(_)       => "datetime field out of range",
+quick_error! {
+    #[derive(PartialEq, Debug, Clone)]
+    pub enum Error {
+        OutOfRange(err: range_check::Error<i64>) {
+            description("offset field out of range")
+            display("Field out of range: {}", err)
+            cause(err)
         }
-    }
-
-    fn cause(&self) -> Option<&ErrorTrait> {
-        if let Error::Date(ref e) = *self {
-            Some(e)
+        SignMismatch {
+            description("sign mismatch")
         }
-        else {
-            None
+        Date(err: local::Error) {
+            from()
+            cause(err)
         }
     }
 }
+
+impl<E> From<range_check::Error<E>> for Error
+where i64: From<E> {
+    fn from(original: range_check::Error<E>) -> Error {
+        Error::OutOfRange(original.generify())
+    }
+}
+
 
 use std::result;
 pub type Result<T> = result::Result<T, Error>;
@@ -185,6 +170,7 @@ impl fmt::Debug for DateTime {
         write!(f, "offset::DateTime({})", self.iso())
     }
 }
+
 
 #[cfg(test)]
 mod test {
