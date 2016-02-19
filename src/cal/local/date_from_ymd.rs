@@ -99,3 +99,17 @@ mod unit_test {
         assert_eq!(date.day(), 13);
     }
 }
+
+
+#[cfg(test)]
+#[allow(trivial_casts)]
+mod quickcheck_test {
+    use cal::DatePiece;
+    use cal::local;
+
+    #[quickcheck]
+    fn ywd_values(ymd: local::Date) {
+        let new = local::Date::ymd(ymd.year(), ymd.month(), ymd.day());
+        assert_eq!(Ok(ymd), new)
+    }
+}

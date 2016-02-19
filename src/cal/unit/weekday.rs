@@ -100,3 +100,16 @@ impl Weekday {
         })
     }
 }
+
+
+#[cfg(test)]
+#[allow(trivial_casts)]
+mod quickcheck_test {
+    use super::Weekday;
+
+    #[quickcheck]
+    fn weekday_values(weekday: Weekday) {
+        let new = Weekday::from_one(weekday.days_from_monday_as_one());
+        assert_eq!(Ok(weekday), new)
+    }
+}

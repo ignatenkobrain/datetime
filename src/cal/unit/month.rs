@@ -175,3 +175,16 @@ impl Month {
         })
     }
 }
+
+
+#[cfg(test)]
+#[allow(trivial_casts)]
+mod quickcheck_test {
+    use super::Month;
+
+    #[quickcheck]
+    fn weekday_values(month: Month) {
+        let new = Month::from_zero(month.months_from_january() as i8);
+        assert_eq!(Ok(month), new)
+    }
+}

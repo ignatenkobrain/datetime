@@ -81,3 +81,17 @@ mod unit_test {
         assert_eq!(-54321234567890, res)
     }
 }
+
+
+#[cfg(test)]
+#[allow(trivial_casts)]
+mod quickcheck_test {
+    use basic::Instant;
+    use cal::local;
+
+    #[quickcheck]
+    fn instant_values(instant: Instant) {
+        let new = local::DateTime::at(instant.seconds()).to_instant();
+        assert_eq!(instant, new)
+    }
+}

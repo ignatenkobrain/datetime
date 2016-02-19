@@ -85,11 +85,8 @@ mod quickcheck_test {
     use cal::local;
 
     #[quickcheck]
-    fn yeardays(ymd: local::Date) {
-        let yd = ymd.yearday();
-        let y  = ymd.year();
-
-        let new = local::Date::yd(y, yd as i64).unwrap();
-        assert_eq!(ymd, new)
+    fn yd_values(ymd: local::Date) {
+        let new = local::Date::yd(ymd.year(), ymd.yearday() as i64);
+        assert_eq!(Ok(ymd), new)
     }
 }
