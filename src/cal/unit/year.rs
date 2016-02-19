@@ -47,32 +47,13 @@ impl Year {
     /// assert_eq!(Year::from(1900).is_leap_year(), false);
     /// ```
     pub fn is_leap_year(&self) -> bool {
-        self.leap_year_calculations().1
-    }
-
-    /// Performs two related calculations for leap years, returning the
-    /// results as a two-part tuple:
-    ///
-    /// 1. The number of leap years that have elapsed prior to this year;
-    /// 2. Whether this year is a leap year or not.
-    pub fn leap_year_calculations(&self) -> (i64, bool) {
         let year = self.0 - 2000;
 
         // This calculation is the reverse of local::Date::from_days_since_epoch.
-        let (num_400y_cycles, mut remainder) = split_cycles(year, 400);
+        let (_, remainder) = split_cycles(year, 400);
 
         // Standard leap-year calculations, performed on the remainder
-        let currently_leap_year = remainder == 0 || (remainder % 100 != 0 && remainder % 4 == 0);
-
-        let num_100y_cycles = remainder / 100;
-        remainder -= num_100y_cycles * 100;
-
-        let leap_years_elapsed = remainder / 4
-            + 97 * num_400y_cycles  // There are 97 leap years in 400 years
-            + 24 * num_100y_cycles  // There are 24 leap years in 100 years
-            - if currently_leap_year { 1 } else { 0 };
-
-        (leap_years_elapsed, currently_leap_year)
+        remainder == 0 || (remainder % 100 != 0 && remainder % 4 == 0)
     }
 }
 

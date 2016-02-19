@@ -1,9 +1,9 @@
 use basic::Instant;
 use util::split_cycles;
 
-use super::date::from_days_since_epoch;
-use super::{Time, DateTime};
-use super::{EPOCH_DIFFERENCE, SECONDS_IN_DAY};
+use super::days_since_epoch::DaysSinceEpoch;
+use super::{Date, Time, DateTime};
+use super::{SECONDS_IN_DAY};
 
 
 impl DateTime {
@@ -24,13 +24,12 @@ impl DateTime {
     /// Computes a complete date-time based on the number of seconds that
     /// have elapsed since **midnight, 1st January, 1970**,
     pub fn at_ms(seconds_since_1970_epoch: i64, millisecond_of_second: i16) -> DateTime {
-        let seconds = seconds_since_1970_epoch - EPOCH_DIFFERENCE * SECONDS_IN_DAY;
 
         // Just split the input value into days and seconds, and let
         // Date and Time do all the hard work.
-        let (days, secs) = split_cycles(seconds, SECONDS_IN_DAY);
+        let (days, secs) = split_cycles(seconds_since_1970_epoch, SECONDS_IN_DAY);
 
-        let date = from_days_since_epoch(days);
+        let date = Date::from(DaysSinceEpoch::new(days));
         let time = Time::from_seconds_and_milliseconds_since_midnight(secs, millisecond_of_second);
 
         DateTime::new(date, time)

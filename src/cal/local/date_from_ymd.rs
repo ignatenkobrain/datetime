@@ -4,8 +4,8 @@ use cal::local::Result;
 use cal::unit::{Year, Month};
 use cal::compound::YearMonthDay;
 
-use super::date::{days_since_epoch, from_days_since_epoch};
-use super::{Date, EPOCH_DIFFERENCE};
+use super::days_since_epoch::DaysSinceEpoch;
+use super::Date;
 
 
 impl Date {
@@ -57,9 +57,9 @@ impl Date {
         let day = try!(day.check_range(1 .. month.days_in_month(year.is_leap_year()) + 1));
 
         let ymd  = YearMonthDay { year: year.into(), month: month, day: day };
-        let days = days_since_epoch(ymd);
+        let days = DaysSinceEpoch::from(ymd);
 
-        Ok(from_days_since_epoch(days - EPOCH_DIFFERENCE))
+        Ok(Date::from(days))
     }
 }
 

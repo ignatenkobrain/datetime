@@ -1,18 +1,24 @@
 use super::{DateTime, SECONDS_IN_DAY};
-use super::date::days_since_epoch;
+use super::days_since_epoch::DaysSinceEpoch;
 use basic::Instant;
 use cal::TimePiece;
+use cal::compound::YearMonthDay;
 
 
 impl DateTime {
     pub fn to_instant(&self) -> Instant {
-        let seconds = days_since_epoch(self.date().into()) * SECONDS_IN_DAY
-            + self.time().to_seconds();
+        // It's easier to do this algorithm in two steps than one: we work out
+        // the number of seconds in the days since the Unix epoch, then the
+        // number of seconds that have elapsed since midnight, then add them
+        // together.
+        let ymd: YearMonthDay = self.date().into();
+        let seconds_since_unix_epoch = DaysSinceEpoch::from(ymd).count() * SECONDS_IN_DAY;
+        let seconds_since_midnight = self.time().to_seconds();
 
+        let seconds = seconds_since_unix_epoch + seconds_since_midnight;
         Instant::at_ms(seconds, self.time().millisecond())
     }
 }
-
 
 
 #[cfg(test)]

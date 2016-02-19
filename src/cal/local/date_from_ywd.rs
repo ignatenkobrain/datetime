@@ -2,8 +2,8 @@ use cal::local::Result;
 use cal::unit::{Year, Month, Weekday};
 use cal::compound::YearMonthDay;
 
-use super::date::{days_to_weekday, days_since_epoch};
-use super::{Date, EPOCH_DIFFERENCE};
+use super::days_since_epoch::DaysSinceEpoch;
+use super::Date;
 
 
 impl Date {
@@ -56,7 +56,8 @@ impl Date {
         let year = year.into();
 
         let jan_4 = YearMonthDay { year: year, month: Month::January, day: 4 };
-        let correction = days_to_weekday(days_since_epoch(jan_4) - EPOCH_DIFFERENCE)
+        let correction = DaysSinceEpoch::from(jan_4)
+            .weekday()
             .days_from_monday_as_one() as i64 + 3;
 
         let yearday = 7 * week + weekday.days_from_monday_as_one() as i64 - correction;
