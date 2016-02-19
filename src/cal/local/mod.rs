@@ -19,6 +19,9 @@ pub use self::datetime::DateTime;
 
 mod days_since_epoch;
 
+#[cfg(any(test, feature = "rand_impls"))]
+mod rand;
+
 
 /// Number of seconds in a day. As everywhere in this library, leap seconds
 /// are simply ignored.

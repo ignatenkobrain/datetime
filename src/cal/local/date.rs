@@ -56,7 +56,6 @@ impl Ord for Date {
     }
 }
 
-
 impl Date {
 
     /// Creates a new datestamp set to the current computer clock's date.
