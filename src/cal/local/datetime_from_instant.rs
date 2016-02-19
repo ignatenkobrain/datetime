@@ -38,7 +38,7 @@ impl DateTime {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use cal::{DatePiece, TimePiece};
     use cal::unit::{Year, Month};
     use cal::local::DateTime;

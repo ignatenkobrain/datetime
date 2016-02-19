@@ -340,7 +340,7 @@ impl<'a> FormatParser<'a> {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     pub use super::{DateFormat, FormatError, Field, Arguments, NumArguments, TextArguments};
     pub use super::Field::*;
 

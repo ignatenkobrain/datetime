@@ -63,7 +63,7 @@ impl fmt::Debug for Instant {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use super::*;
 
     #[test]

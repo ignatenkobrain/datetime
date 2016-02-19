@@ -89,7 +89,7 @@ fn is_tz_component(component: &OsStr) -> bool {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use super::{sys_time, extract_timezone};
     use std::path::Path;
 

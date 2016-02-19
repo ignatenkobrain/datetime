@@ -22,7 +22,7 @@ impl Sub<Duration> for local::DateTime {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use basic::Duration;
     use cal::local;
 

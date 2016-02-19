@@ -22,7 +22,7 @@ impl DateTime {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use cal::local;
 
     #[test]

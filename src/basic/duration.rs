@@ -82,7 +82,7 @@ impl Mul<i64> for Duration {
 
 
 #[cfg(test)]
-mod test_addition {
+mod unit_test_addition {
     use super::*;
 
     #[test]
@@ -108,7 +108,7 @@ mod test_addition {
 
 
 #[cfg(test)]
-mod test_subtraction {
+mod unit_test_subtraction {
     use super::*;
 
     #[test]
@@ -134,7 +134,7 @@ mod test_subtraction {
 
 
 #[cfg(test)]
-mod test_multiplication {
+mod unit_test_multiplication {
     use super::*;
 
     #[test]

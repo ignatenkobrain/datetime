@@ -173,7 +173,7 @@ impl fmt::Debug for DateTime {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use super::Offset;
 
     #[test]

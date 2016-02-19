@@ -124,7 +124,7 @@ impl fmt::Debug for YearMonths {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use cal::unit::Year;
     use cal::unit::Month::*;
 

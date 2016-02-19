@@ -63,7 +63,7 @@ impl Date {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use cal::local;
     use cal::DatePiece;
     use cal::unit::{Year, Month};

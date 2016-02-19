@@ -87,7 +87,7 @@ impl DoubleEndedIterator for MonthDays {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use cal::local::Date;
     use cal::unit::Year;
     use cal::unit::Month::*;

@@ -91,7 +91,7 @@ impl AsMut<i64> for Year {
 
 
 #[cfg(test)]
-mod test_leap_years {
+mod unit_test_leap_years {
     use super::*;
 
     #[test]

@@ -29,7 +29,7 @@ impl Sub<Duration> for Instant {
 
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use basic::{Instant, Duration};
 
     #[test]

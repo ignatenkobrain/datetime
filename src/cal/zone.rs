@@ -411,7 +411,7 @@ pub mod runtime {
 }
 
 #[cfg(test)]
-mod test {
+mod unit_test {
     use super::*;
     use super::Surroundings;
     use std::borrow::Cow;
