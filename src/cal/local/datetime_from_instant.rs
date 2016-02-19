@@ -1,7 +1,8 @@
 use basic::Instant;
 use util::split_cycles;
 
-use super::{Date, Time, DateTime};
+use super::date::from_days_since_epoch;
+use super::{Time, DateTime};
 use super::{EPOCH_DIFFERENCE, SECONDS_IN_DAY};
 
 
@@ -29,7 +30,7 @@ impl DateTime {
         // Date and Time do all the hard work.
         let (days, secs) = split_cycles(seconds, SECONDS_IN_DAY);
 
-        let date = Date::from_days_since_epoch(days);
+        let date = from_days_since_epoch(days);
         let time = Time::from_seconds_and_milliseconds_since_midnight(secs, millisecond_of_second);
 
         DateTime::new(date, time)

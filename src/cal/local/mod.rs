@@ -4,6 +4,9 @@ mod error;
 pub use self::error::{Error, Result};
 
 mod date;
+mod date_from_yd;
+mod date_from_ymd;
+mod date_from_ywd;
 pub use self::date::Date;
 
 mod time;
